@@ -1,0 +1,8 @@
+{
+  "name": "ConstructPlan AI",
+  "description": "A comprehensive construction planning and design ecosystem with engineering calculators, AI-powered design assistant, and site analysis tools.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
