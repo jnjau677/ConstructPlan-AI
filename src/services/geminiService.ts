@@ -4,6 +4,9 @@ let aiInstance: GoogleGenAI | null = null;
 
 export function getGeminiAI() {
   if (!aiInstance) {
+    // SECURITY NOTE: The GEMINI_API_KEY is currently exposed to the client-side
+    // because it's bundled by Vite (see vite.config.ts). For production,
+    // this should be moved to a backend proxy to keep the key secure.
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) {
       throw new Error("GEMINI_API_KEY is not defined in environment variables.");
@@ -38,7 +41,9 @@ export async function askAiArchitect(prompt: string, context?: string) {
 
     return response.text;
   } catch (error) {
-    console.error("Gemini API Error:", error);
-    throw error;
+    // SECURITY: Log a generic error message to avoid leaking internal details
+    // of the API response or stack trace in the browser console.
+    console.error("Gemini API Error: An error occurred during the generation process.");
+    throw new Error("Generation failed. Please try again later.");
   }
 }
