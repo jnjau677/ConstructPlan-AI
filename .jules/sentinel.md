@@ -1,0 +1,4 @@
+## 2025-05-15 - [Exposed API Keys in Client-side Bundle]
+**Vulnerability:** GEMINI_API_KEY is injected into the client-side bundle via Vite's `define` configuration in `vite.config.ts`, making it accessible to anyone who inspects the application's source code in the browser.
+**Learning:** The application uses `process.env.GEMINI_API_KEY` directly in `src/services/geminiService.ts`, and Vite is configured to replace this with the actual key at build time. While `metadata.json` suggests server-side capability, the current implementation is purely client-side.
+**Prevention:** Transition Gemini API calls to a backend proxy (e.g., the Express server suggested in `package.json`) so that the API key remains on the server and is never sent to the client. Use a Content Security Policy (CSP) as a secondary defense layer to restrict where the client can connect.
