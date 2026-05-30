@@ -38,7 +38,12 @@ export async function askAiArchitect(prompt: string, context?: string) {
 
     return response.text;
   } catch (error) {
-    console.error("Gemini API Error:", error);
-    throw error;
+    // Sanitize error logging to prevent accidental leakage of sensitive information
+    // in the browser console, such as API keys or internal stack traces.
+    const errorMessage = error instanceof Error ? error.message : "Unknown AI Error";
+    console.error("Gemini API Error:", errorMessage);
+
+    // Throw a generic error to prevent leaking implementation details to the caller
+    throw new Error("The AI Architect is currently unavailable. Please try again.");
   }
 }
