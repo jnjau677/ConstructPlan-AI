@@ -3,16 +3,26 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from 'react';
+import React, { useState, Suspense } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import Sidebar from './components/Sidebar.tsx';
-import Dashboard from './components/Dashboard.tsx';
-import EngineeringCalculators from './components/EngineeringCalculators.tsx';
-import AiDesignAssistant from './components/AiDesignAssistant.tsx';
-import SiteAnalysis from './components/SiteAnalysis.tsx';
-import TakeoffEstimator from './components/TakeoffEstimator.tsx';
-import SchematicStudio from './components/SchematicStudio.tsx';
-import SystemCapabilities from './components/SystemCapabilities.tsx';
+
+// Performance: Component-level code splitting to reduce initial bundle size (~960kB -> ~300kB expected)
+const Dashboard = React.lazy(() => import('./components/Dashboard.tsx'));
+const EngineeringCalculators = React.lazy(() => import('./components/EngineeringCalculators.tsx'));
+const AiDesignAssistant = React.lazy(() => import('./components/AiDesignAssistant.tsx'));
+const SiteAnalysis = React.lazy(() => import('./components/SiteAnalysis.tsx'));
+const TakeoffEstimator = React.lazy(() => import('./components/TakeoffEstimator.tsx'));
+const SchematicStudio = React.lazy(() => import('./components/SchematicStudio.tsx'));
+const SystemCapabilities = React.lazy(() => import('./components/SystemCapabilities.tsx'));
+
+const LoadingFallback = () => (
+  <div className="flex items-center justify-center min-h-[400px]">
+    <div className="text-indigo-400 font-mono text-xs animate-pulse tracking-[0.3em] uppercase">
+      Initializing Module...
+    </div>
+  </div>
+);
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('overview');
@@ -53,7 +63,9 @@ export default function App() {
                 exit={{ opacity: 0, x: -20 }}
                 transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
               >
-                {renderContent()}
+                <Suspense fallback={<LoadingFallback />}>
+                  {renderContent()}
+                </Suspense>
               </motion.div>
             </AnimatePresence>
           </div>
