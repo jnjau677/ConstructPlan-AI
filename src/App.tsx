@@ -7,12 +7,15 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import Sidebar from './components/Sidebar.tsx';
 import Dashboard from './components/Dashboard.tsx';
-import EngineeringCalculators from './components/EngineeringCalculators.tsx';
-import AiDesignAssistant from './components/AiDesignAssistant.tsx';
-import SiteAnalysis from './components/SiteAnalysis.tsx';
-import TakeoffEstimator from './components/TakeoffEstimator.tsx';
-import SchematicStudio from './components/SchematicStudio.tsx';
-import SystemCapabilities from './components/SystemCapabilities.tsx';
+
+// Performance Optimization: Route-based code splitting
+// Using React.lazy to reduce initial bundle size and load heavy components only when needed.
+const EngineeringCalculators = React.lazy(() => import('./components/EngineeringCalculators.tsx'));
+const AiDesignAssistant = React.lazy(() => import('./components/AiDesignAssistant.tsx'));
+const SiteAnalysis = React.lazy(() => import('./components/SiteAnalysis.tsx'));
+const TakeoffEstimator = React.lazy(() => import('./components/TakeoffEstimator.tsx'));
+const SchematicStudio = React.lazy(() => import('./components/SchematicStudio.tsx'));
+const SystemCapabilities = React.lazy(() => import('./components/SystemCapabilities.tsx'));
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('overview');
@@ -53,7 +56,15 @@ export default function App() {
                 exit={{ opacity: 0, x: -20 }}
                 transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
               >
-                {renderContent()}
+                <React.Suspense fallback={
+                  <div className="flex items-center justify-center h-[400px]">
+                    <div className="text-indigo-400 font-mono text-[10px] animate-pulse tracking-[0.5em] uppercase">
+                      Initializing_Module...
+                    </div>
+                  </div>
+                }>
+                  {renderContent()}
+                </React.Suspense>
               </motion.div>
             </AnimatePresence>
           </div>
