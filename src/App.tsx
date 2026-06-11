@@ -3,16 +3,18 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from 'react';
+import React, { useState, lazy, Suspense } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import Sidebar from './components/Sidebar.tsx';
-import Dashboard from './components/Dashboard.tsx';
-import EngineeringCalculators from './components/EngineeringCalculators.tsx';
-import AiDesignAssistant from './components/AiDesignAssistant.tsx';
-import SiteAnalysis from './components/SiteAnalysis.tsx';
-import TakeoffEstimator from './components/TakeoffEstimator.tsx';
-import SchematicStudio from './components/SchematicStudio.tsx';
-import SystemCapabilities from './components/SystemCapabilities.tsx';
+
+// Performance: Lazy load heavy components to reduce initial bundle size
+const Dashboard = lazy(() => import('./components/Dashboard.tsx'));
+const EngineeringCalculators = lazy(() => import('./components/EngineeringCalculators.tsx'));
+const AiDesignAssistant = lazy(() => import('./components/AiDesignAssistant.tsx'));
+const SiteAnalysis = lazy(() => import('./components/SiteAnalysis.tsx'));
+const TakeoffEstimator = lazy(() => import('./components/TakeoffEstimator.tsx'));
+const SchematicStudio = lazy(() => import('./components/SchematicStudio.tsx'));
+const SystemCapabilities = lazy(() => import('./components/SystemCapabilities.tsx'));
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('overview');
@@ -20,21 +22,21 @@ export default function App() {
   const renderContent = () => {
     switch (activeTab) {
       case 'overview':
-        return <Dashboard key="overview" />;
+        return <Dashboard />;
       case 'capabilities':
-        return <SystemCapabilities key="capabilities" />;
+        return <SystemCapabilities />;
       case 'schematics':
-        return <SchematicStudio key="schematics" />;
+        return <SchematicStudio />;
       case 'calculators':
-        return <EngineeringCalculators key="calculators" />;
+        return <EngineeringCalculators />;
       case 'ai-assistant':
-        return <AiDesignAssistant key="ai-assistant" />;
+        return <AiDesignAssistant />;
       case 'site-analysis':
-        return <SiteAnalysis key="site-analysis" />;
+        return <SiteAnalysis />;
       case 'estimations':
-        return <TakeoffEstimator key="estimations" />;
+        return <TakeoffEstimator />;
       default:
-        return <Dashboard key="default" />;
+        return <Dashboard />;
     }
   };
 
@@ -53,7 +55,13 @@ export default function App() {
                 exit={{ opacity: 0, x: -20 }}
                 transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
               >
-                {renderContent()}
+                <Suspense fallback={
+                  <div className="h-96 flex items-center justify-center font-mono text-indigo-400 animate-pulse">
+                    LOADING_BIM_MODULE...
+                  </div>
+                }>
+                  {renderContent()}
+                </Suspense>
               </motion.div>
             </AnimatePresence>
           </div>
