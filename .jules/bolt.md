@@ -1,0 +1,3 @@
+## 2025-05-15 - Heavy Library Chunking via Route-based Code Splitting
+**Learning:** In this architecture, heavy dependencies like `recharts` (~385kB) and `react-markdown` (~181kB) were being bundled into the main entry point despite only being used in specific tabs. Standard React 19 `React.lazy` and `Suspense` integrated seamlessly with `AnimatePresence (mode="wait")`, allowing for a massive ~64% reduction in initial bundle size (951kB -> 338kB) without visual regressions.
+**Action:** Always audit the production build (`pnpm build`) for large chunks and prioritize splitting components that pull in heavy third-party libraries.
