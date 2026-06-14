@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { 
   Mountain, 
   Scan, 
@@ -17,6 +17,24 @@ import { motion } from 'motion/react';
 export default function SiteAnalysis() {
   const [activeLayer, setActiveLayer] = useState('lidar');
   const [activeOverlays, setActiveOverlays] = useState<string[]>([]);
+
+  // Stabilize point cluster to prevent visual jitter on re-renders
+  const pointCluster = useMemo(() => [...Array(15)].map((_, i) => (
+    <motion.div
+      key={i}
+      initial={{ scale: 0, opacity: 0 }}
+      animate={{ scale: 1, opacity: 0.15 }}
+      transition={{ delay: i * 0.03 }}
+      className="absolute border border-indigo-500/40 rounded-lg bg-indigo-500/5 backdrop-blur-[1px]"
+      style={{
+        width: `${Math.random() * 300 + 100}px`,
+        height: `${Math.random() * 150 + 50}px`,
+        left: `${Math.random() * 100}%`,
+        top: `${Math.random() * 100}%`,
+        transform: 'translate(-50%, -50%) skew(15deg, -2deg)',
+      }}
+    />
+  )), []);
 
   const toggleOverlay = (id: string) => {
     setActiveOverlays(prev => 
@@ -128,22 +146,7 @@ export default function SiteAnalysis() {
               {/* Viz Overlays */}
               {activeLayer === 'lidar' && (
                 <div className="relative w-full h-full overflow-hidden">
-                  {[...Array(15)].map((_, i) => (
-                    <motion.div
-                      key={i}
-                      initial={{ scale: 0, opacity: 0 }}
-                      animate={{ scale: 1, opacity: 0.15 }}
-                      transition={{ delay: i * 0.03 }}
-                      className="absolute border border-indigo-500/40 rounded-lg bg-indigo-500/5 backdrop-blur-[1px]"
-                      style={{
-                        width: `${Math.random() * 300 + 100}px`,
-                        height: `${Math.random() * 150 + 50}px`,
-                        left: `${Math.random() * 100}%`,
-                        top: `${Math.random() * 100}%`,
-                        transform: 'translate(-50%, -50%) skew(15deg, -2deg)',
-                      }}
-                    />
-                  ))}
+                  {pointCluster}
                   <div className="absolute inset-0 flex items-center justify-center">
                     <div className="text-indigo-500 font-mono text-[10px] animate-pulse tracking-[0.5em] flex flex-col items-center gap-4">
                        <Scan className="w-8 h-8 opacity-40" />
