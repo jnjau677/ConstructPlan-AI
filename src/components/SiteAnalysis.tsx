@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { 
   Mountain, 
   Scan, 
@@ -23,6 +23,13 @@ export default function SiteAnalysis() {
       prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]
     );
   };
+
+  const lidarPoints = useMemo(() => [...Array(15)].map((_, i) => ({
+    width: `${Math.random() * 300 + 100}px`,
+    height: `${Math.random() * 150 + 50}px`,
+    left: `${Math.random() * 100}%`,
+    top: `${Math.random() * 100}%`,
+  })), []);
 
   return (
     <div className="space-y-8">
@@ -128,7 +135,7 @@ export default function SiteAnalysis() {
               {/* Viz Overlays */}
               {activeLayer === 'lidar' && (
                 <div className="relative w-full h-full overflow-hidden">
-                  {[...Array(15)].map((_, i) => (
+                  {lidarPoints.map((style, i) => (
                     <motion.div
                       key={i}
                       initial={{ scale: 0, opacity: 0 }}
@@ -136,10 +143,7 @@ export default function SiteAnalysis() {
                       transition={{ delay: i * 0.03 }}
                       className="absolute border border-indigo-500/40 rounded-lg bg-indigo-500/5 backdrop-blur-[1px]"
                       style={{
-                        width: `${Math.random() * 300 + 100}px`,
-                        height: `${Math.random() * 150 + 50}px`,
-                        left: `${Math.random() * 100}%`,
-                        top: `${Math.random() * 100}%`,
+                        ...style,
                         transform: 'translate(-50%, -50%) skew(15deg, -2deg)',
                       }}
                     />
