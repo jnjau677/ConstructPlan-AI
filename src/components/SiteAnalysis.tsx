@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { 
   Mountain, 
   Scan, 
@@ -23,6 +23,18 @@ export default function SiteAnalysis() {
       prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]
     );
   };
+
+  // Bolt Optimization: Stabilize LiDAR point styles to prevent visual jitter and reduce
+  // ~60 Math.random() calls and string concatenations per render.
+  const lidarPoints = useMemo(() => {
+    return [...Array(15)].map(() => ({
+      width: `${Math.random() * 300 + 100}px`,
+      height: `${Math.random() * 150 + 50}px`,
+      left: `${Math.random() * 100}%`,
+      top: `${Math.random() * 100}%`,
+      transform: 'translate(-50%, -50%) skew(15deg, -2deg)',
+    }));
+  }, []);
 
   return (
     <div className="space-y-8">
@@ -128,20 +140,14 @@ export default function SiteAnalysis() {
               {/* Viz Overlays */}
               {activeLayer === 'lidar' && (
                 <div className="relative w-full h-full overflow-hidden">
-                  {[...Array(15)].map((_, i) => (
+                  {lidarPoints.map((style, i) => (
                     <motion.div
                       key={i}
                       initial={{ scale: 0, opacity: 0 }}
                       animate={{ scale: 1, opacity: 0.15 }}
                       transition={{ delay: i * 0.03 }}
                       className="absolute border border-indigo-500/40 rounded-lg bg-indigo-500/5 backdrop-blur-[1px]"
-                      style={{
-                        width: `${Math.random() * 300 + 100}px`,
-                        height: `${Math.random() * 150 + 50}px`,
-                        left: `${Math.random() * 100}%`,
-                        top: `${Math.random() * 100}%`,
-                        transform: 'translate(-50%, -50%) skew(15deg, -2deg)',
-                      }}
+                      style={style}
                     />
                   ))}
                   <div className="absolute inset-0 flex items-center justify-center">
