@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { 
   Mountain, 
   Scan, 
@@ -14,6 +14,19 @@ import {
 } from 'lucide-react';
 import { motion } from 'motion/react';
 
+const RASTER_LAYERS = [
+  { id: 'lidar', label: 'Point Cloud', icon: Scan },
+  { id: 'contours', label: 'Topography', icon: Mountain },
+  { id: 'ortho', label: 'Ortho-Mosaic', icon: MapIcon },
+  { id: 'cadastral', label: 'Cadastral', icon: Layers },
+];
+
+const VECTOR_OVERLAYS = [
+  { id: 'utilities', label: 'Utility Mapping', icon: Zap },
+  { id: 'soil', label: 'Soil Composition', icon: Layers },
+  { id: 'vegetation', label: 'Tree Protection', icon: Leaf },
+];
+
 export default function SiteAnalysis() {
   const [activeLayer, setActiveLayer] = useState('lidar');
   const [activeOverlays, setActiveOverlays] = useState<string[]>([]);
@@ -23,6 +36,26 @@ export default function SiteAnalysis() {
       prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]
     );
   };
+
+  // Memoize LiDAR point styles to prevent visual jitter and redundant calculations
+  // Estimated impact: Reduces ~60 Math.random() calls and string concatenations per re-render
+  const lidarPoints = useMemo(() => {
+    return [...Array(15)].map(() => ({
+      width: `${Math.random() * 300 + 100}px`,
+      height: `${Math.random() * 150 + 50}px`,
+      left: `${Math.random() * 100}%`,
+      top: `${Math.random() * 100}%`,
+    }));
+  }, []);
+
+  // Memoize vegetation styles to stabilize UI and improve performance
+  const vegetationStyles = useMemo(() => {
+    return [...Array(5)].map((_, i) => ({
+      left: `${25 + (i * 12)}%`,
+      top: `${30 + (i % 2 === 0 ? 15 : -10) + (i * 8)}%`,
+      animationDelay: `${i * 0.5}s`
+    }));
+  }, []);
 
   return (
     <div className="space-y-8">
@@ -42,12 +75,7 @@ export default function SiteAnalysis() {
         {/* Layer Controls */}
         <div className="lg:col-span-1 space-y-4">
           <h4 className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] mb-4">Raster Display Layers</h4>
-          {[
-            { id: 'lidar', label: 'Point Cloud', icon: Scan },
-            { id: 'contours', label: 'Topography', icon: Mountain },
-            { id: 'ortho', label: 'Ortho-Mosaic', icon: MapIcon },
-            { id: 'cadastral', label: 'Cadastral', icon: Layers },
-          ].map((layer) => (
+          {RASTER_LAYERS.map((layer) => (
             <button
               key={layer.id}
               onClick={() => setActiveLayer(layer.id)}
@@ -65,11 +93,7 @@ export default function SiteAnalysis() {
 
           <h4 className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] mb-4 mt-8">Vector Overlays</h4>
           <div className="space-y-3">
-          {[
-            { id: 'utilities', label: 'Utility Mapping', icon: Zap },
-            { id: 'soil', label: 'Soil Composition', icon: Layers },
-            { id: 'vegetation', label: 'Tree Protection', icon: Leaf },
-          ].map((overlay) => (
+          {VECTOR_OVERLAYS.map((overlay) => (
             <button
               key={overlay.id}
               onClick={() => toggleOverlay(overlay.id)}
@@ -128,7 +152,7 @@ export default function SiteAnalysis() {
               {/* Viz Overlays */}
               {activeLayer === 'lidar' && (
                 <div className="relative w-full h-full overflow-hidden">
-                  {[...Array(15)].map((_, i) => (
+                  {lidarPoints.map((style, i) => (
                     <motion.div
                       key={i}
                       initial={{ scale: 0, opacity: 0 }}
@@ -136,10 +160,7 @@ export default function SiteAnalysis() {
                       transition={{ delay: i * 0.03 }}
                       className="absolute border border-indigo-500/40 rounded-lg bg-indigo-500/5 backdrop-blur-[1px]"
                       style={{
-                        width: `${Math.random() * 300 + 100}px`,
-                        height: `${Math.random() * 150 + 50}px`,
-                        left: `${Math.random() * 100}%`,
-                        top: `${Math.random() * 100}%`,
+                        ...style,
                         transform: 'translate(-50%, -50%) skew(15deg, -2deg)',
                       }}
                     />
@@ -202,15 +223,11 @@ export default function SiteAnalysis() {
 
               {activeOverlays.includes('vegetation') && (
                  <div className="absolute inset-0 pointer-events-none overflow-hidden z-20">
-                    {[...Array(5)].map((_, i) => (
+                    {vegetationStyles.map((style, i) => (
                       <div 
                         key={i} 
                         className="absolute w-28 h-28 rounded-full border border-emerald-500/30 bg-emerald-500/10 backdrop-blur-[2px] flex items-center justify-center animate-[pulse_4s_ease-in-out_infinite]"
-                        style={{
-                          left: `${25 + (i * 12)}%`,
-                          top: `${30 + (i % 2 === 0 ? 15 : -10) + (i * 8)}%`,
-                          animationDelay: `${i * 0.5}s`
-                        }}
+                        style={style}
                       >
                          <div className="w-2 h-2 bg-emerald-400 rounded-full shadow-[0_0_10px_#10b981]" />
                          <div className="absolute w-full h-full border border-emerald-500/20 rounded-full scale-125" />
