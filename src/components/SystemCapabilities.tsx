@@ -1,64 +1,59 @@
 import React from 'react';
 import { 
   MessageSquare, 
-  Eye, 
   Calculator, 
   Library, 
   BarChart3, 
   Users,
-  Sparkles,
-  MousePointer2,
-  Mic,
   Camera,
-  Layers,
   Zap,
-  Globe,
   FileText
 } from 'lucide-react';
 import { motion } from 'motion/react';
 
+// BOLT OPTIMIZATION: Hoisted static configuration to prevent redundant per-render allocations.
 const features = [
   {
     id: 1,
     title: 'Chat-to-Build Engine',
-    description: 'Natural language modeling for real-time architectural iteration. Skip the toolbars—describe your vision.',
+    description: 'Natural Language Modeling: Skip complex toolbars. Describe your vision and watch the AI draw, move walls, and add rooms in real-time.',
     icon: MessageSquare,
     details: ['Context-Aware Iteration', 'Voice-to-Blueprint', 'Architectural Flow AI']
   },
   {
     id: 2,
     title: 'Vision AI: Sketch-to-Scale',
-    description: 'Convert napkin sketches into millimetric CAD vectors using computer vision and edge detection.',
+    description: 'Hand-Sketch Conversion: Upload photos of napkin sketches. AI uses computer vision to identify walls and labels, converting them into CAD vectors.',
     icon: Camera,
-    details: ['Hand-Sketch Conversion', 'Style Transfer', 'Vectorization']
+    details: ['Millimetric Accuracy', 'Hand-Styling Mode', 'Raster-to-Vector']
   },
   {
     id: 3,
     title: 'Smart Engineer',
-    description: 'Automated code compliance for stairs, roofs, and foundations. Technical logic built-in.',
+    description: 'Auto-Code Logic: Define points and watch AI calculate perfect rise/run for stairs and structural rafter systems for complex roofs.',
     icon: Calculator,
-    details: ['Stair Logic', 'Roofing Intelligence', 'Ground Analysis']
+    details: ['Stair Stringer Engine', 'Roofing Intelligence', 'Cut & Fill Analysis']
   },
   {
     id: 4,
     title: 'Generative Library',
-    description: 'Dynamic templates and style-transfer modules that snap into your layout automatically.',
+    description: 'Smart Modules: Create room templates that snap automatically. Apply Scandi or Industrial styles to instantly render textures and finishes.',
     icon: Library,
-    details: ['Smart Modules', 'ADA Compliance', 'Scandinavian Style-Transfer']
+    details: ['Smart Room Templates', 'AI Style-Transfer', 'Component Snapping']
   },
   {
     id: 5,
     title: 'Project Economics',
-    description: 'One-click takeoff with live BOQ and energy efficiency simulations for LEED certification.',
+    description: 'One-Click Takeoff: Real-time BOQ for materials. Cost forecasting and energy efficiency simulations synchronized with your design.',
     icon: BarChart3,
-    details: ['Live BOQ', 'Cost Forecasting', 'Carbon Footprint LCA']
+    details: ['Live BOQ Mapping', 'Market Cost Forecasting', 'LCA Carbon Simulator']
   },
   {
     id: 6,
     title: 'Immersive Collab',
-    description: 'AR on-site overlays and multiplayer editing with permit-ready PDF exports.',
+    description: 'Project overlay on-site using AR. Invite clients and contractors for multiplayer editing and instant sticky-note feedback.',
     icon: Users,
-    details: ['AR Viewport', 'Multiplayer Sync', 'Permit Exports']
+    details: ['AR On-Site Overlay', 'Multiplayer Sync', 'Global Log Sync']
   }
 ];
 
@@ -85,50 +80,7 @@ export default function SystemCapabilities() {
       </header>
 
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
-        {[
-          {
-            id: 1,
-            title: 'Chat-to-Build Engine',
-            description: 'Natural Language Modeling: Skip complex toolbars. Describe your vision and watch the AI draw, move walls, and add rooms in real-time.',
-            icon: MessageSquare,
-            details: ['Context-Aware Iteration', 'Voice-to-Blueprint', 'Architectural Flow AI']
-          },
-          {
-            id: 2,
-            title: 'Vision AI: Sketch-to-Scale',
-            description: 'Hand-Sketch Conversion: Upload photos of napkin sketches. AI uses computer vision to identify walls and labels, converting them into CAD vectors.',
-            icon: Camera,
-            details: ['Millimetric Accuracy', 'Hand-Styling Mode', 'Raster-to-Vector']
-          },
-          {
-            id: 3,
-            title: 'Smart Engineer',
-            description: 'Auto-Code Logic: Define points and watch AI calculate perfect rise/run for stairs and structural rafter systems for complex roofs.',
-            icon: Calculator,
-            details: ['Stair Stringer Engine', 'Roofing Intelligence', 'Cut & Fill Analysis']
-          },
-          {
-            id: 4,
-            title: 'Generative Library',
-            description: 'Smart Modules: Create room templates that snap automatically. Apply Scandi or Industrial styles to instantly render textures and finishes.',
-            icon: Library,
-            details: ['Smart Room Templates', 'AI Style-Transfer', 'Component Snapping']
-          },
-          {
-            id: 5,
-            title: 'Project Economics',
-            description: 'One-Click Takeoff: Real-time BOQ for materials. Cost forecasting and energy efficiency simulations synchronized with your design.',
-            icon: BarChart3,
-            details: ['Live BOQ Mapping', 'Market Cost Forecasting', 'LCA Carbon Simulator']
-          },
-          {
-            id: 6,
-            title: 'Immersive Collab',
-            description: 'Project overlay on-site using AR. Invite clients and contractors for multiplayer editing and instant sticky-note feedback.',
-            icon: Users,
-            details: ['AR On-Site Overlay', 'Multiplayer Sync', 'Global Log Sync']
-          }
-        ].map((feature, i) => (
+        {features.map((feature, i) => (
           <motion.div
             key={feature.id}
             initial={{ opacity: 0, y: 30 }}
