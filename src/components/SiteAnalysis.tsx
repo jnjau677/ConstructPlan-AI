@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { 
   Mountain, 
   Scan, 
@@ -14,9 +14,35 @@ import {
 } from 'lucide-react';
 import { motion } from 'motion/react';
 
+// BOLT OPTIMIZATION: Hoist static configuration to prevent redundant object allocations on every render.
+const RASTER_LAYERS = [
+  { id: 'lidar', label: 'Point Cloud', icon: Scan },
+  { id: 'contours', label: 'Topography', icon: Mountain },
+  { id: 'ortho', label: 'Ortho-Mosaic', icon: MapIcon },
+  { id: 'cadastral', label: 'Cadastral', icon: Layers },
+];
+
+const VECTOR_OVERLAYS = [
+  { id: 'utilities', label: 'Utility Mapping', icon: Zap },
+  { id: 'soil', label: 'Soil Composition', icon: Layers },
+  { id: 'vegetation', label: 'Tree Protection', icon: Leaf },
+];
+
 export default function SiteAnalysis() {
   const [activeLayer, setActiveLayer] = useState('lidar');
   const [activeOverlays, setActiveOverlays] = useState<string[]>([]);
+
+  // BOLT OPTIMIZATION: Stabilize random LiDAR properties to prevent visual jitter on re-render.
+  // This reduces per-render Math.random() calls and layout recalculations.
+  const lidarPoints = useMemo(() => {
+    return [...Array(15)].map((_, i) => ({
+      width: `${Math.random() * 300 + 100}px`,
+      height: `${Math.random() * 150 + 50}px`,
+      left: `${Math.random() * 100}%`,
+      top: `${Math.random() * 100}%`,
+      delay: i * 0.03
+    }));
+  }, []);
 
   const toggleOverlay = (id: string) => {
     setActiveOverlays(prev => 
@@ -42,12 +68,7 @@ export default function SiteAnalysis() {
         {/* Layer Controls */}
         <div className="lg:col-span-1 space-y-4">
           <h4 className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] mb-4">Raster Display Layers</h4>
-          {[
-            { id: 'lidar', label: 'Point Cloud', icon: Scan },
-            { id: 'contours', label: 'Topography', icon: Mountain },
-            { id: 'ortho', label: 'Ortho-Mosaic', icon: MapIcon },
-            { id: 'cadastral', label: 'Cadastral', icon: Layers },
-          ].map((layer) => (
+          {RASTER_LAYERS.map((layer) => (
             <button
               key={layer.id}
               onClick={() => setActiveLayer(layer.id)}
@@ -65,11 +86,7 @@ export default function SiteAnalysis() {
 
           <h4 className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] mb-4 mt-8">Vector Overlays</h4>
           <div className="space-y-3">
-          {[
-            { id: 'utilities', label: 'Utility Mapping', icon: Zap },
-            { id: 'soil', label: 'Soil Composition', icon: Layers },
-            { id: 'vegetation', label: 'Tree Protection', icon: Leaf },
-          ].map((overlay) => (
+          {VECTOR_OVERLAYS.map((overlay) => (
             <button
               key={overlay.id}
               onClick={() => toggleOverlay(overlay.id)}
@@ -128,18 +145,18 @@ export default function SiteAnalysis() {
               {/* Viz Overlays */}
               {activeLayer === 'lidar' && (
                 <div className="relative w-full h-full overflow-hidden">
-                  {[...Array(15)].map((_, i) => (
+                  {lidarPoints.map((point, i) => (
                     <motion.div
                       key={i}
                       initial={{ scale: 0, opacity: 0 }}
                       animate={{ scale: 1, opacity: 0.15 }}
-                      transition={{ delay: i * 0.03 }}
+                      transition={{ delay: point.delay }}
                       className="absolute border border-indigo-500/40 rounded-lg bg-indigo-500/5 backdrop-blur-[1px]"
                       style={{
-                        width: `${Math.random() * 300 + 100}px`,
-                        height: `${Math.random() * 150 + 50}px`,
-                        left: `${Math.random() * 100}%`,
-                        top: `${Math.random() * 100}%`,
+                        width: point.width,
+                        height: point.height,
+                        left: point.left,
+                        top: point.top,
                         transform: 'translate(-50%, -50%) skew(15deg, -2deg)',
                       }}
                     />
