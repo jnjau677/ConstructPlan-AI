@@ -6,13 +6,34 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import Sidebar from './components/Sidebar.tsx';
-import Dashboard from './components/Dashboard.tsx';
-import EngineeringCalculators from './components/EngineeringCalculators.tsx';
-import AiDesignAssistant from './components/AiDesignAssistant.tsx';
-import SiteAnalysis from './components/SiteAnalysis.tsx';
-import TakeoffEstimator from './components/TakeoffEstimator.tsx';
-import SchematicStudio from './components/SchematicStudio.tsx';
-import SystemCapabilities from './components/SystemCapabilities.tsx';
+import { Suspense, lazy } from 'react';
+
+// BOLT OPTIMIZATION: Route-based code splitting to reduce initial bundle size.
+// This allows the browser to download only the code required for the active tab.
+const Dashboard = lazy(() => import('./components/Dashboard.tsx'));
+const EngineeringCalculators = lazy(() => import('./components/EngineeringCalculators.tsx'));
+const AiDesignAssistant = lazy(() => import('./components/AiDesignAssistant.tsx'));
+const SiteAnalysis = lazy(() => import('./components/SiteAnalysis.tsx'));
+const TakeoffEstimator = lazy(() => import('./components/TakeoffEstimator.tsx'));
+const SchematicStudio = lazy(() => import('./components/SchematicStudio.tsx'));
+const SystemCapabilities = lazy(() => import('./components/SystemCapabilities.tsx'));
+
+const LoadingFallback = () => (
+  <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-4">
+    <div className="text-indigo-400 font-mono text-sm animate-pulse tracking-[0.3em] uppercase">
+      Loading_BIM_Module...
+    </div>
+    <div className="w-48 h-1 bg-slate-800 rounded-full overflow-hidden">
+      <div className="h-full bg-indigo-500 w-1/3 animate-[loading_1.5s_ease-in-out_infinite]" />
+    </div>
+    <style dangerouslySetInnerHTML={{ __html: `
+      @keyframes loading {
+        0% { transform: translateX(-100%); }
+        100% { transform: translateX(300%); }
+      }
+    `}} />
+  </div>
+);
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('overview');
@@ -53,7 +74,9 @@ export default function App() {
                 exit={{ opacity: 0, x: -20 }}
                 transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
               >
-                {renderContent()}
+                <Suspense fallback={<LoadingFallback />}>
+                  {renderContent()}
+                </Suspense>
               </motion.div>
             </AnimatePresence>
           </div>
