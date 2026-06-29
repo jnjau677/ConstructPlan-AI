@@ -1,0 +1,4 @@
+## 2025-05-15 - Secret Exposure via Vite Define
+**Vulnerability:** The `GEMINI_API_KEY` was being injected into the client-side bundle using Vite's `define` configuration. This made the API key accessible to anyone inspecting the frontend application's source code or network traffic.
+**Learning:** Using `define` in `vite.config.ts` to inject environment variables that are not prefixed with `VITE_` can still lead to exposure if they are explicitly mapped. This is a common pattern for local development that often leaks into production.
+**Prevention:** Always use a server-side proxy for sensitive API calls. Keep API keys and system instructions exclusively on the backend (e.g., Vercel Functions). Avoid using `define` for sensitive data; use a backend that can securely access environment variables at runtime.
