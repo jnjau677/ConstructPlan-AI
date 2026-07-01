@@ -1,0 +1,3 @@
+## 2025-05-15 - Route-based Code Splitting with React.lazy
+**Learning:** Large monolithic bundles in React applications can significantly delay the "Time to Interactive". Route-based or tab-based code splitting using `React.lazy` and `Suspense` effectively reduces the initial JS payload. In this project, splitting major components like `Dashboard` and `AiDesignAssistant` (which have heavy dependencies like `recharts` and `react-markdown`) resulted in a ~65% reduction of the main entry point bundle.
+**Action:** Always check bundle composition in projects with heavy dependencies; prioritize lazy-loading large, non-critical modules that aren't needed for the initial view.

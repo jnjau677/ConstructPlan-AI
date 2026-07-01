@@ -3,16 +3,16 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from 'react';
+import React, { useState, Suspense } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import Sidebar from './components/Sidebar.tsx';
-import Dashboard from './components/Dashboard.tsx';
-import EngineeringCalculators from './components/EngineeringCalculators.tsx';
-import AiDesignAssistant from './components/AiDesignAssistant.tsx';
-import SiteAnalysis from './components/SiteAnalysis.tsx';
-import TakeoffEstimator from './components/TakeoffEstimator.tsx';
-import SchematicStudio from './components/SchematicStudio.tsx';
-import SystemCapabilities from './components/SystemCapabilities.tsx';
+const Dashboard = React.lazy(() => import('./components/Dashboard.tsx'));
+const EngineeringCalculators = React.lazy(() => import('./components/EngineeringCalculators.tsx'));
+const AiDesignAssistant = React.lazy(() => import('./components/AiDesignAssistant.tsx'));
+const SiteAnalysis = React.lazy(() => import('./components/SiteAnalysis.tsx'));
+const TakeoffEstimator = React.lazy(() => import('./components/TakeoffEstimator.tsx'));
+const SchematicStudio = React.lazy(() => import('./components/SchematicStudio.tsx'));
+const SystemCapabilities = React.lazy(() => import('./components/SystemCapabilities.tsx'));
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('overview');
@@ -53,7 +53,23 @@ export default function App() {
                 exit={{ opacity: 0, x: -20 }}
                 transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
               >
-                {renderContent()}
+                <Suspense fallback={
+                  <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
+                    <div className="text-indigo-400 font-mono text-xs animate-pulse tracking-[0.3em]">
+                      LOADING_BIM_MODULE...
+                    </div>
+                    <div className="w-48 h-1 bg-slate-800 rounded-full overflow-hidden">
+                      <motion.div
+                        className="h-full bg-indigo-500 shadow-[0_0_8px_#6366f1]"
+                        initial={{ x: '-100%' }}
+                        animate={{ x: '100%' }}
+                        transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
+                      />
+                    </div>
+                  </div>
+                }>
+                  {renderContent()}
+                </Suspense>
               </motion.div>
             </AnimatePresence>
           </div>
