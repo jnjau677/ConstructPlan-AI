@@ -3,16 +3,37 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from 'react';
+import React, { useState, lazy, Suspense } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import Sidebar from './components/Sidebar.tsx';
-import Dashboard from './components/Dashboard.tsx';
-import EngineeringCalculators from './components/EngineeringCalculators.tsx';
-import AiDesignAssistant from './components/AiDesignAssistant.tsx';
-import SiteAnalysis from './components/SiteAnalysis.tsx';
-import TakeoffEstimator from './components/TakeoffEstimator.tsx';
-import SchematicStudio from './components/SchematicStudio.tsx';
-import SystemCapabilities from './components/SystemCapabilities.tsx';
+
+// BOLT OPTIMIZATION: Implement code splitting for main modules to reduce initial bundle size
+// Expected impact: ~15-20% reduction in entry-point JS size
+const Dashboard = lazy(() => import('./components/Dashboard.tsx'));
+const EngineeringCalculators = lazy(() => import('./components/EngineeringCalculators.tsx'));
+const AiDesignAssistant = lazy(() => import('./components/AiDesignAssistant.tsx'));
+const SiteAnalysis = lazy(() => import('./components/SiteAnalysis.tsx'));
+const TakeoffEstimator = lazy(() => import('./components/TakeoffEstimator.tsx'));
+const SchematicStudio = lazy(() => import('./components/SchematicStudio.tsx'));
+const SystemCapabilities = lazy(() => import('./components/SystemCapabilities.tsx'));
+
+function LoadingFallback() {
+  return (
+    <div className="flex flex-col items-center justify-center min-h-[400px] space-y-6">
+      <div className="text-indigo-400 font-mono text-xs animate-pulse tracking-[0.3em] uppercase">
+        Loading_BIM_Module...
+      </div>
+      <div className="w-64 h-1 bg-slate-800 rounded-full overflow-hidden">
+        <motion.div
+          className="h-full bg-indigo-500 shadow-[0_0_12px_#6366f1]"
+          initial={{ x: '-100%' }}
+          animate={{ x: '100%' }}
+          transition={{ repeat: Infinity, duration: 1.5, ease: "linear" }}
+        />
+      </div>
+    </div>
+  );
+}
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('overview');
@@ -53,7 +74,9 @@ export default function App() {
                 exit={{ opacity: 0, x: -20 }}
                 transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
               >
-                {renderContent()}
+                <Suspense fallback={<LoadingFallback />}>
+                  {renderContent()}
+                </Suspense>
               </motion.div>
             </AnimatePresence>
           </div>
