@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { 
   Mountain, 
   Scan, 
@@ -127,30 +127,7 @@ export default function SiteAnalysis() {
               
               {/* Viz Overlays */}
               {activeLayer === 'lidar' && (
-                <div className="relative w-full h-full overflow-hidden">
-                  {[...Array(15)].map((_, i) => (
-                    <motion.div
-                      key={i}
-                      initial={{ scale: 0, opacity: 0 }}
-                      animate={{ scale: 1, opacity: 0.15 }}
-                      transition={{ delay: i * 0.03 }}
-                      className="absolute border border-indigo-500/40 rounded-lg bg-indigo-500/5 backdrop-blur-[1px]"
-                      style={{
-                        width: `${Math.random() * 300 + 100}px`,
-                        height: `${Math.random() * 150 + 50}px`,
-                        left: `${Math.random() * 100}%`,
-                        top: `${Math.random() * 100}%`,
-                        transform: 'translate(-50%, -50%) skew(15deg, -2deg)',
-                      }}
-                    />
-                  ))}
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="text-indigo-500 font-mono text-[10px] animate-pulse tracking-[0.5em] flex flex-col items-center gap-4">
-                       <Scan className="w-8 h-8 opacity-40" />
-                       ANALYZING_POINT_CLUSTER...
-                    </div>
-                  </div>
-                </div>
+                <LidarView />
               )}
 
               {activeLayer === 'contours' && (
@@ -238,6 +215,52 @@ export default function SiteAnalysis() {
                  </div>
               </div>
            </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * BOLT OPTIMIZATION: Memoized LiDAR point cloud visualization.
+ * Using useMemo with an empty dependency array stabilizes the random properties
+ * of the point elements, preventing visual jitter and redundant calculations
+ * during component re-renders.
+ */
+function LidarView() {
+  const points = useMemo(() => {
+    return [...Array(15)].map((_, i) => ({
+      id: i,
+      width: `${Math.random() * 300 + 100}px`,
+      height: `${Math.random() * 150 + 50}px`,
+      left: `${Math.random() * 100}%`,
+      top: `${Math.random() * 100}%`,
+      delay: i * 0.03,
+    }));
+  }, []);
+
+  return (
+    <div className="relative w-full h-full overflow-hidden">
+      {points.map((p) => (
+        <motion.div
+          key={p.id}
+          initial={{ scale: 0, opacity: 0 }}
+          animate={{ scale: 1, opacity: 0.15 }}
+          transition={{ delay: p.delay }}
+          className="absolute border border-indigo-500/40 rounded-lg bg-indigo-500/5 backdrop-blur-[1px]"
+          style={{
+            width: p.width,
+            height: p.height,
+            left: p.left,
+            top: p.top,
+            transform: 'translate(-50%, -50%) skew(15deg, -2deg)',
+          }}
+        />
+      ))}
+      <div className="absolute inset-0 flex items-center justify-center">
+        <div className="text-indigo-500 font-mono text-[10px] animate-pulse tracking-[0.5em] flex flex-col items-center gap-4">
+           <Scan className="w-8 h-8 opacity-40" />
+           ANALYZING_POINT_CLUSTER...
         </div>
       </div>
     </div>
