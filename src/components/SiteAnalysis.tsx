@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { 
   Mountain, 
   Scan, 
@@ -13,6 +13,47 @@ import {
   Leaf
 } from 'lucide-react';
 import { motion } from 'motion/react';
+
+// BOLT OPTIMIZATION: Sub-component to isolate LiDAR visualization and stabilize random data
+const LidarView = () => {
+  const points = useMemo(() => {
+    return [...Array(15)].map((_, i) => ({
+      id: i,
+      width: `${Math.random() * 300 + 100}px`,
+      height: `${Math.random() * 150 + 50}px`,
+      left: `${Math.random() * 100}%`,
+      top: `${Math.random() * 100}%`,
+      delay: i * 0.03
+    }));
+  }, []);
+
+  return (
+    <div className="relative w-full h-full overflow-hidden">
+      {points.map((p) => (
+        <motion.div
+          key={p.id}
+          initial={{ scale: 0, opacity: 0 }}
+          animate={{ scale: 1, opacity: 0.15 }}
+          transition={{ delay: p.delay }}
+          className="absolute border border-indigo-500/40 rounded-lg bg-indigo-500/5 backdrop-blur-[1px]"
+          style={{
+            width: p.width,
+            height: p.height,
+            left: p.left,
+            top: p.top,
+            transform: 'translate(-50%, -50%) skew(15deg, -2deg)',
+          }}
+        />
+      ))}
+      <div className="absolute inset-0 flex items-center justify-center">
+        <div className="text-indigo-500 font-mono text-[10px] animate-pulse tracking-[0.5em] flex flex-col items-center gap-4">
+           <Scan className="w-8 h-8 opacity-40" />
+           ANALYZING_POINT_CLUSTER...
+        </div>
+      </div>
+    </div>
+  );
+};
 
 export default function SiteAnalysis() {
   const [activeLayer, setActiveLayer] = useState('lidar');
@@ -126,32 +167,7 @@ export default function SiteAnalysis() {
               <div className="absolute inset-0 bg-[linear-gradient(rgba(99,102,241,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(99,102,241,0.03)_1px,transparent_1px)] bg-[size:32px_32px]" />
               
               {/* Viz Overlays */}
-              {activeLayer === 'lidar' && (
-                <div className="relative w-full h-full overflow-hidden">
-                  {[...Array(15)].map((_, i) => (
-                    <motion.div
-                      key={i}
-                      initial={{ scale: 0, opacity: 0 }}
-                      animate={{ scale: 1, opacity: 0.15 }}
-                      transition={{ delay: i * 0.03 }}
-                      className="absolute border border-indigo-500/40 rounded-lg bg-indigo-500/5 backdrop-blur-[1px]"
-                      style={{
-                        width: `${Math.random() * 300 + 100}px`,
-                        height: `${Math.random() * 150 + 50}px`,
-                        left: `${Math.random() * 100}%`,
-                        top: `${Math.random() * 100}%`,
-                        transform: 'translate(-50%, -50%) skew(15deg, -2deg)',
-                      }}
-                    />
-                  ))}
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="text-indigo-500 font-mono text-[10px] animate-pulse tracking-[0.5em] flex flex-col items-center gap-4">
-                       <Scan className="w-8 h-8 opacity-40" />
-                       ANALYZING_POINT_CLUSTER...
-                    </div>
-                  </div>
-                </div>
-              )}
+              {activeLayer === 'lidar' && <LidarView />}
 
               {activeLayer === 'contours' && (
                 <div className="w-full h-full flex items-center justify-center">
