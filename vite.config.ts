@@ -6,10 +6,53 @@ import {defineConfig, loadEnv} from 'vite';
 export default defineConfig(({mode}) => {
   const env = loadEnv(mode, '.', '');
   return {
-    plugins: [react(), tailwindcss()],
-    define: {
-      'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY),
-    },
+    plugins: [
+      react(),
+      tailwindcss(),
+      {
+        name: 'api-proxy',
+        configureServer(server) {
+          server.middlewares.use(async (req, res, next) => {
+            if (req.url?.startsWith('/api/chat')) {
+              try {
+                // Ensure env vars are available in process.env for the loaded module
+                Object.assign(process.env, loadEnv(mode, ".", ""));
+
+                const module = await server.ssrLoadModule('/api/chat.ts');
+                const handler = module.default;
+
+                // Simple mock of Vercel request/response for local dev
+                const body = await new Promise((resolve) => {
+                  let data = '';
+                  req.on('data', chunk => data += chunk);
+                  req.on('end', () => resolve(data ? JSON.parse(data) : {}));
+                });
+
+                const vercelRes = {
+                  status: (code: number) => {
+                    res.statusCode = code;
+                    return vercelRes;
+                  },
+                  json: (data: any) => {
+                    res.setHeader('Content-Type', 'application/json');
+                    res.end(JSON.stringify(data));
+                    return vercelRes;
+                  }
+                };
+
+                await handler({ ...req, body }, vercelRes);
+              } catch (error) {
+                console.error('Local API Error:', error);
+                res.statusCode = 500;
+                res.end(JSON.stringify({ error: 'Internal Server Error' }));
+              }
+              return;
+            }
+            next();
+          });
+        }
+      }
+    ],
     resolve: {
       alias: {
         '@': path.resolve(__dirname, '.'),
