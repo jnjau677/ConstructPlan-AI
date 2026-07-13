@@ -3,16 +3,36 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from 'react';
+import React, { useState, lazy, Suspense } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import Sidebar from './components/Sidebar.tsx';
-import Dashboard from './components/Dashboard.tsx';
-import EngineeringCalculators from './components/EngineeringCalculators.tsx';
-import AiDesignAssistant from './components/AiDesignAssistant.tsx';
-import SiteAnalysis from './components/SiteAnalysis.tsx';
-import TakeoffEstimator from './components/TakeoffEstimator.tsx';
-import SchematicStudio from './components/SchematicStudio.tsx';
-import SystemCapabilities from './components/SystemCapabilities.tsx';
+
+const Dashboard = lazy(() => import('./components/Dashboard.tsx'));
+const EngineeringCalculators = lazy(() => import('./components/EngineeringCalculators.tsx'));
+const AiDesignAssistant = lazy(() => import('./components/AiDesignAssistant.tsx'));
+const SiteAnalysis = lazy(() => import('./components/SiteAnalysis.tsx'));
+const TakeoffEstimator = lazy(() => import('./components/TakeoffEstimator.tsx'));
+const SchematicStudio = lazy(() => import('./components/SchematicStudio.tsx'));
+const SystemCapabilities = lazy(() => import('./components/SystemCapabilities.tsx'));
+
+const LoadingFallback = () => (
+  <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-6">
+    <div className="flex items-center gap-3">
+      <div className="w-2 h-2 bg-indigo-500 rounded-full animate-pulse" />
+      <span className="text-[10px] font-mono font-bold tracking-[0.3em] text-indigo-400 uppercase">
+        LOADING_BIM_MODULE...
+      </span>
+    </div>
+    <div className="w-48 h-1 bg-slate-800 rounded-full overflow-hidden">
+      <motion.div
+        className="h-full bg-indigo-500 shadow-[0_0_8px_#6366f1]"
+        initial={{ width: "0%" }}
+        animate={{ width: "100%" }}
+        transition={{ duration: 1, repeat: Infinity, ease: "easeInOut" }}
+      />
+    </div>
+  </div>
+);
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('overview');
@@ -53,7 +73,9 @@ export default function App() {
                 exit={{ opacity: 0, x: -20 }}
                 transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
               >
-                {renderContent()}
+                <Suspense fallback={<LoadingFallback />}>
+                  {renderContent()}
+                </Suspense>
               </motion.div>
             </AnimatePresence>
           </div>
