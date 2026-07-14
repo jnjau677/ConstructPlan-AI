@@ -131,7 +131,10 @@ export default function Dashboard() {
     );
   };
 
-  const visibleGanttData = ganttData.filter(d => !hiddenPhases.includes(d.phase));
+  // Performance: Memoize filtered data to prevent unnecessary array operations on every render.
+  const visibleGanttData = useMemo(() => {
+    return ganttData.filter(d => !hiddenPhases.includes(d.phase));
+  }, [ganttData, hiddenPhases]);
 
   return (
     <div className="space-y-8">
