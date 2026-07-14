@@ -6,10 +6,31 @@ import {defineConfig, loadEnv} from 'vite';
 export default defineConfig(({mode}) => {
   const env = loadEnv(mode, '.', '');
   return {
-    plugins: [react(), tailwindcss()],
-    define: {
-      'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY),
-    },
+    plugins: [
+      react(),
+      tailwindcss(),
+      {
+        name: 'api-middleware',
+        configureServer(server) {
+          server.middlewares.use(async (req, res, next) => {
+            if (req.url?.startsWith('/api/chat')) {
+              try {
+                // Manually populate process.env for the SSR module
+                Object.assign(process.env, env);
+                const handler = await server.ssrLoadModule('./api/chat.ts');
+                await handler.default(req, res);
+              } catch (error) {
+                console.error('Middleware Error:', error);
+                res.statusCode = 500;
+                res.end(JSON.stringify({ error: 'Internal Server Error' }));
+              }
+              return;
+            }
+            next();
+          });
+        },
+      },
+    ],
     resolve: {
       alias: {
         '@': path.resolve(__dirname, '.'),
