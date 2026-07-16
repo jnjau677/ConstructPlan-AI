@@ -1,0 +1,3 @@
+## 2025-05-15 - React Hook Rules and Code Splitting
+**Learning:** Placing hooks like `useMemo` inside conditional blocks (e.g., `{condition && <Component />}`) violates React's Rules of Hooks and causes runtime crashes when the condition changes. Additionally, when using `React.lazy` with `AnimatePresence`, the `Suspense` boundary should be placed *inside* the `motion.div` that has the `key` prop to ensure transitions work correctly while modules load.
+**Action:** Always declare hooks at the top level of the component. When implementing code splitting in a project using Framer Motion, nest `Suspense` within the animated container.
