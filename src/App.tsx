@@ -6,37 +6,19 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import Sidebar from './components/Sidebar.tsx';
-import Dashboard from './components/Dashboard.tsx';
-import EngineeringCalculators from './components/EngineeringCalculators.tsx';
-import AiDesignAssistant from './components/AiDesignAssistant.tsx';
-import SiteAnalysis from './components/SiteAnalysis.tsx';
-import TakeoffEstimator from './components/TakeoffEstimator.tsx';
-import SchematicStudio from './components/SchematicStudio.tsx';
-import SystemCapabilities from './components/SystemCapabilities.tsx';
+import LoadingModule from './components/LoadingModule.tsx';
+
+// Performance: Lazy load modules to reduce initial bundle size
+const Dashboard = React.lazy(() => import('./components/Dashboard.tsx'));
+const EngineeringCalculators = React.lazy(() => import('./components/EngineeringCalculators.tsx'));
+const AiDesignAssistant = React.lazy(() => import('./components/AiDesignAssistant.tsx'));
+const SiteAnalysis = React.lazy(() => import('./components/SiteAnalysis.tsx'));
+const TakeoffEstimator = React.lazy(() => import('./components/TakeoffEstimator.tsx'));
+const SchematicStudio = React.lazy(() => import('./components/SchematicStudio.tsx'));
+const SystemCapabilities = React.lazy(() => import('./components/SystemCapabilities.tsx'));
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('overview');
-
-  const renderContent = () => {
-    switch (activeTab) {
-      case 'overview':
-        return <Dashboard key="overview" />;
-      case 'capabilities':
-        return <SystemCapabilities key="capabilities" />;
-      case 'schematics':
-        return <SchematicStudio key="schematics" />;
-      case 'calculators':
-        return <EngineeringCalculators key="calculators" />;
-      case 'ai-assistant':
-        return <AiDesignAssistant key="ai-assistant" />;
-      case 'site-analysis':
-        return <SiteAnalysis key="site-analysis" />;
-      case 'estimations':
-        return <TakeoffEstimator key="estimations" />;
-      default:
-        return <Dashboard key="default" />;
-    }
-  };
 
   return (
     <div className="flex h-screen bg-[#0f172a] font-sans text-slate-200 overflow-hidden">
@@ -53,7 +35,28 @@ export default function App() {
                 exit={{ opacity: 0, x: -20 }}
                 transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
               >
-                {renderContent()}
+                <React.Suspense fallback={<LoadingModule />}>
+                  {(() => {
+                    switch (activeTab) {
+                      case 'overview':
+                        return <Dashboard key="overview" />;
+                      case 'capabilities':
+                        return <SystemCapabilities key="capabilities" />;
+                      case 'schematics':
+                        return <SchematicStudio key="schematics" />;
+                      case 'calculators':
+                        return <EngineeringCalculators key="calculators" />;
+                      case 'ai-assistant':
+                        return <AiDesignAssistant key="ai-assistant" />;
+                      case 'site-analysis':
+                        return <SiteAnalysis key="site-analysis" />;
+                      case 'estimations':
+                        return <TakeoffEstimator key="estimations" />;
+                      default:
+                        return <Dashboard key="default" />;
+                    }
+                  })()}
+                </React.Suspense>
               </motion.div>
             </AnimatePresence>
           </div>
