@@ -3,16 +3,20 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from 'react';
+import React, { useState, lazy, Suspense } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import Sidebar from './components/Sidebar.tsx';
-import Dashboard from './components/Dashboard.tsx';
-import EngineeringCalculators from './components/EngineeringCalculators.tsx';
-import AiDesignAssistant from './components/AiDesignAssistant.tsx';
-import SiteAnalysis from './components/SiteAnalysis.tsx';
-import TakeoffEstimator from './components/TakeoffEstimator.tsx';
-import SchematicStudio from './components/SchematicStudio.tsx';
-import SystemCapabilities from './components/SystemCapabilities.tsx';
+import LoadingModule from './components/LoadingModule.tsx';
+
+// ⚡ Bolt Optimization: Code split the heavy BIM modules using React.lazy.
+// This reduces the main chunk size significantly and defer loading non-critical views.
+const Dashboard = lazy(() => import('./components/Dashboard.tsx'));
+const EngineeringCalculators = lazy(() => import('./components/EngineeringCalculators.tsx'));
+const AiDesignAssistant = lazy(() => import('./components/AiDesignAssistant.tsx'));
+const SiteAnalysis = lazy(() => import('./components/SiteAnalysis.tsx'));
+const TakeoffEstimator = lazy(() => import('./components/TakeoffEstimator.tsx'));
+const SchematicStudio = lazy(() => import('./components/SchematicStudio.tsx'));
+const SystemCapabilities = lazy(() => import('./components/SystemCapabilities.tsx'));
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('overview');
@@ -53,7 +57,14 @@ export default function App() {
                 exit={{ opacity: 0, x: -20 }}
                 transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
               >
-                {renderContent()}
+                {/*
+                  ⚡ Bolt Optimization: Wrap lazy loaded modules in Suspense.
+                  Framer Motion constraint: Suspense placed inside motion.div child
+                  so that exit transitions trigger perfectly during module swaps.
+                */}
+                <Suspense fallback={<LoadingModule />}>
+                  {renderContent()}
+                </Suspense>
               </motion.div>
             </AnimatePresence>
           </div>
