@@ -1,0 +1,3 @@
+## 2024-07-17 - React.lazy Code Splitting on BIM Modules
+**Learning:** Code-splitting heavy dashboard widgets and interactive panels (e.g. Markdown engines, complex Recharts modules, LiDAR visualizers) into individual on-demand chunks significantly slashes the initial entry bundle size (from 960kB down to 338kB, a ~65% reduction). When using Framer Motion's AnimatePresence, nested Suspense boundaries must be within the motion wrapper to guarantee graceful exit transitions.
+**Action:** When working on multipage or multi-tab single page applications, analyze bundle sizing and always lazily import heavy content views, wrapping them in structured Suspense loaders placed correctly within visual container animations.
