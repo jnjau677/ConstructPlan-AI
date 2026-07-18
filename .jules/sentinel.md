@@ -1,0 +1,4 @@
+## 2026-07-18 - Client-Side API Key Exposure in Vite Builds
+**Vulnerability:** The VITE build was injecting the sensitive `GEMINI_API_KEY` into the static frontend assets via the `define` parameter in `vite.config.ts`, exposing the API key directly in client-side Javascript bundles to anyone inspecting the site.
+**Learning:** Hardcoding or injecting API keys into client-side code is an architectural risk. To prevent leakage, sensitive API keys and third-party interactions must reside entirely on the backend, with the frontend querying a local endpoint that proxies requests.
+**Prevention:** Always proxy calls to sensitive third-party APIs through serverless/backend handlers. Ensure that build tools (like Vite, Webpack, etc.) do not compile sensitive environment variables into production assets, and use grep verification patterns on the `dist/` bundle to confirm absence of secrets.
