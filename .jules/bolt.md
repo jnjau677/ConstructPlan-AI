@@ -1,0 +1,3 @@
+## 2026-03-01 - Code Splitting & Random Render Stability
+**Learning:** Heavy route modules like Dashboard.tsx (importing recharts and date-fns) and AiDesignAssistant.tsx (importing react-markdown) bloat the main JS entry bundle to nearly 1MB. Additionally, generating pseudo-random coordinates inside render loops for complex visualization overlays (like LiDAR in SiteAnalysis.tsx) causes severe layout thrashing and visual jank on every state update.
+**Action:** Always implement code splitting via React.lazy and Suspense for page-level components, and use useMemo with an empty dependency array to stabilize random aesthetic mock properties.
