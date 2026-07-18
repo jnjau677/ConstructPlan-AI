@@ -1,0 +1,3 @@
+## 2025-07-18 - Framer Motion with Suspense & React.lazy
+**Learning:** In applications utilizing Framer Motion's `AnimatePresence` for tab/route transitions, introducing `React.lazy` without careful placement of the `Suspense` boundary can lead to aborted or glitched exit transitions. If the `Suspense` boundary is placed outside the animated `motion.div` element, the fallback state instantly replaces the exiting component, destroying the animation. Placed inside, the exiting module maintains its structure, and the entering module's transition handles the fallback gracefully.
+**Action:** When implementing lazy loading for animated components, always wrap only the interior of the `motion.div` with the `<Suspense>` boundary.
