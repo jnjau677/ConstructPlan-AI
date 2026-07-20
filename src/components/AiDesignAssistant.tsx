@@ -32,10 +32,14 @@ export default function AiDesignAssistant() {
     }
   }, [messages]);
 
+  const MAX_INPUT_LENGTH = 4000;
+
   const handleSend = async () => {
     if (!input.trim() || isLoading) return;
 
     const userMsg = input.trim();
+    if (userMsg.length > MAX_INPUT_LENGTH) return;
+
     setInput('');
     setMessages(prev => [...prev, { role: 'user', content: userMsg }]);
     setIsLoading(true);
@@ -106,15 +110,29 @@ export default function AiDesignAssistant() {
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), handleSend())}
               placeholder="Query zoning constraints, material lifecycle, or structural vectors..."
-              className="w-full bg-[#020617] border border-slate-800 p-4 pr-16 rounded-2xl min-h-[100px] resize-none focus:outline-none focus:border-indigo-500 transition-all font-sans text-sm text-white placeholder-slate-600"
+              className={`w-full bg-[#020617] border ${input.length > MAX_INPUT_LENGTH ? 'border-red-500 focus:border-red-500' : 'border-slate-800 focus:border-indigo-500'} p-4 pr-16 rounded-2xl min-h-[100px] resize-none focus:outline-none transition-all font-sans text-sm text-white placeholder-slate-600`}
             />
             <button 
               onClick={handleSend}
-              disabled={isLoading || !input.trim()}
+              disabled={isLoading || !input.trim() || input.length > MAX_INPUT_LENGTH}
               className="absolute bottom-4 right-4 p-3 bg-indigo-600 text-white rounded-xl hover:bg-indigo-500 transition-all disabled:opacity-20 shadow-lg shadow-indigo-900/20"
             >
               <Send className="w-4 h-4" />
             </button>
+          </div>
+          <div className="flex justify-between items-center mt-2 px-1 text-[9px] font-mono uppercase tracking-widest">
+            <div>
+              {input.length > MAX_INPUT_LENGTH ? (
+                <span className="text-red-400 font-bold flex items-center gap-1">
+                  <AlertCircle className="w-3 h-3 inline" /> Input exceeds 4000 character limit
+                </span>
+              ) : (
+                <span className="text-slate-500">Security: Input validation active</span>
+              )}
+            </div>
+            <div className={`${input.length > MAX_INPUT_LENGTH ? 'text-red-400 font-bold' : 'text-slate-500'}`}>
+              {input.length}/{MAX_INPUT_LENGTH}
+            </div>
           </div>
           <p className="text-[9px] text-slate-600 mt-3 uppercase tracking-tighter text-center font-mono">Kernel: Gemini-3-Flash // Verify with local council data</p>
         </div>

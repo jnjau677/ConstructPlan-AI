@@ -14,6 +14,10 @@ export function getGeminiAI() {
 }
 
 export async function askAiArchitect(prompt: string, context?: string) {
+  if (prompt.length > 4000) {
+    throw new Error("Prompt exceeds maximum length of 4000 characters.");
+  }
+
   const ai = getGeminiAI();
   const systemInstruction = `You are "ArcSystem PRO", a high-end professional Architect and Construction AI Consultant. 
   Your capabilities include:
@@ -38,7 +42,10 @@ export async function askAiArchitect(prompt: string, context?: string) {
 
     return response.text;
   } catch (error) {
-    console.error("Gemini API Error:", error);
-    throw error;
+    // Sanitize the logged message to avoid leaking keys, credentials, or internal details
+    const rawMessage = error instanceof Error ? error.message : String(error);
+    const sanitizedMsg = rawMessage.replace(/AI_KEY|API_KEY|secret|key|token/gi, "[REDACTED]");
+    console.error("Gemini API Error:", sanitizedMsg);
+    throw new Error(sanitizedMsg);
   }
 }
