@@ -1,0 +1,3 @@
+## 2026-07-21 - Dynamic Code Splitting on heavy BIM Module Components
+**Learning:** Monolithic bundle sizing (~960kB) dramatically slows down the initial Time to Interactive (TTI) for our primary CAD workspace. Grouping recharts, react-markdown, and complex local modules into separate async chunks via React.lazy reduces the main entry chunk size down to ~337kB (a ~64.8% improvement), significantly accelerating initial paint times.
+**Action:** When working with dashboard-style web applications containing heavy graphing, markdown, and LiDAR visualization utilities, always dynamically code-split each layout module behind React.lazy and Suspense boundaries inside the main router/state layout.
