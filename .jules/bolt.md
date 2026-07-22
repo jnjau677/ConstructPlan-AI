@@ -1,0 +1,3 @@
+## 2026-03-01 - Code Splitting with Framer Motion AnimatePresence
+**Learning:** When using Framer Motion's `AnimatePresence` with `lazy` loaded React components, the `<Suspense>` boundary should be placed inside the `<motion.div>` child component rather than wrapping it. Wrapping the entire animated route element in `<Suspense>` can disrupt exit animations during lazy chunk retrieval, leading to layout stutter or absent transitions.
+**Action:** Place the `<Suspense>` boundary immediately inside the individual `<motion.div>` route containers to ensure that entry/exit transitions run uninterrupted while the component chunk fetches in the background.
