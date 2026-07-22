@@ -14,6 +14,10 @@ export function getGeminiAI() {
 }
 
 export async function askAiArchitect(prompt: string, context?: string) {
+  if (prompt.length > 4000) {
+    throw new Error("Input prompt exceeds maximum allowed limit of 4000 characters.");
+  }
+
   const ai = getGeminiAI();
   const systemInstruction = `You are "ArcSystem PRO", a high-end professional Architect and Construction AI Consultant. 
   Your capabilities include:
@@ -38,7 +42,15 @@ export async function askAiArchitect(prompt: string, context?: string) {
 
     return response.text;
   } catch (error) {
-    console.error("Gemini API Error:", error);
-    throw error;
+    // Sanitize the error message to prevent API key leaks or internal details exposure.
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    const apiKey = process.env.GEMINI_API_KEY;
+    const sanitizedMessage = apiKey
+      ? errorMessage.replace(new RegExp(apiKey.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&'), 'g'), '[REDACTED_API_KEY]')
+      : errorMessage;
+
+    console.error("Gemini API Error:", sanitizedMessage);
+    // Throw a generic secure error message to avoid leaking stack traces to the client.
+    throw new Error("Gemini API request failed. Please check your credentials and retry.");
   }
 }
