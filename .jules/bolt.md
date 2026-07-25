@@ -1,0 +1,3 @@
+## 2025-07-25 - [Dynamic Code Splitting and Stable Point Memoization]
+**Learning:** Code splitting with `React.lazy` and `Suspense` inside `AnimatePresence` dramatically reduces initial asset delivery cost by chunking heavy tab modules. Additionally, unstable inline computations using `Math.random()` on heavy visual structures causes continuous, redundant DOM style re-calculations and layout jittering, which can be elegantly stabilized using `useMemo` with an empty dependency array.
+**Action:** When introducing lazy-loaded routes/tabs within Framer Motion transitions, make sure to place the `Suspense` boundary *inside* the `motion.div` key to allow smooth enter/exit animations. Stabilize any random rendering property generations with `useMemo`.

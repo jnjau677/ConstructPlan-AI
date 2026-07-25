@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { 
   Mountain, 
   Scan, 
@@ -23,6 +23,20 @@ export default function SiteAnalysis() {
       prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]
     );
   };
+
+  // Performance Optimization: Generate and memoize stable random properties for
+  // LiDAR visualizer points. This prevents heavy visual elements from shifting layout
+  // and recalculating random properties on every single component render (stabilizes layout).
+  const lidarPoints = useMemo(() => {
+    return [...Array(15)].map((_, i) => ({
+      id: i,
+      delay: i * 0.03,
+      width: `${Math.random() * 300 + 100}px`,
+      height: `${Math.random() * 150 + 50}px`,
+      left: `${Math.random() * 100}%`,
+      top: `${Math.random() * 100}%`,
+    }));
+  }, []);
 
   return (
     <div className="space-y-8">
@@ -128,18 +142,18 @@ export default function SiteAnalysis() {
               {/* Viz Overlays */}
               {activeLayer === 'lidar' && (
                 <div className="relative w-full h-full overflow-hidden">
-                  {[...Array(15)].map((_, i) => (
+                  {lidarPoints.map((pt) => (
                     <motion.div
-                      key={i}
+                      key={pt.id}
                       initial={{ scale: 0, opacity: 0 }}
                       animate={{ scale: 1, opacity: 0.15 }}
-                      transition={{ delay: i * 0.03 }}
+                      transition={{ delay: pt.delay }}
                       className="absolute border border-indigo-500/40 rounded-lg bg-indigo-500/5 backdrop-blur-[1px]"
                       style={{
-                        width: `${Math.random() * 300 + 100}px`,
-                        height: `${Math.random() * 150 + 50}px`,
-                        left: `${Math.random() * 100}%`,
-                        top: `${Math.random() * 100}%`,
+                        width: pt.width,
+                        height: pt.height,
+                        left: pt.left,
+                        top: pt.top,
                         transform: 'translate(-50%, -50%) skew(15deg, -2deg)',
                       }}
                     />
