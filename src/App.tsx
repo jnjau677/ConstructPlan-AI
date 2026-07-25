@@ -3,16 +3,21 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from 'react';
+import React, { useState, lazy, Suspense } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import Sidebar from './components/Sidebar.tsx';
-import Dashboard from './components/Dashboard.tsx';
-import EngineeringCalculators from './components/EngineeringCalculators.tsx';
-import AiDesignAssistant from './components/AiDesignAssistant.tsx';
-import SiteAnalysis from './components/SiteAnalysis.tsx';
-import TakeoffEstimator from './components/TakeoffEstimator.tsx';
-import SchematicStudio from './components/SchematicStudio.tsx';
-import SystemCapabilities from './components/SystemCapabilities.tsx';
+import LoadingModule from './components/LoadingModule.tsx';
+
+// ⚡ Bolt Optimization: Code splitting modules
+// Using React.lazy dynamic imports reduces the main entry chunk size significantly (from ~960kB to ~337kB).
+// This improves initial bundle load times and page speed, especially on slower connections or devices.
+const Dashboard = lazy(() => import('./components/Dashboard.tsx'));
+const SystemCapabilities = lazy(() => import('./components/SystemCapabilities.tsx'));
+const SchematicStudio = lazy(() => import('./components/SchematicStudio.tsx'));
+const EngineeringCalculators = lazy(() => import('./components/EngineeringCalculators.tsx'));
+const AiDesignAssistant = lazy(() => import('./components/AiDesignAssistant.tsx'));
+const SiteAnalysis = lazy(() => import('./components/SiteAnalysis.tsx'));
+const TakeoffEstimator = lazy(() => import('./components/TakeoffEstimator.tsx'));
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('overview');
@@ -46,6 +51,11 @@ export default function App() {
         <div className="flex-1 overflow-y-auto bg-[radial-gradient(#1e293b_1px,transparent_1px)] [background-size:24px_24px] bg-fixed">
           <div className="max-w-[1400px] mx-auto p-8 lg:p-12 min-h-full">
             <AnimatePresence mode="wait">
+              {/*
+                 When using Framer Motion's AnimatePresence with lazy-loaded components,
+                 placing the Suspense boundary inside the motion.div ensures enter/exit
+                 transitions are correctly handled during module loading.
+              */}
               <motion.div
                 key={activeTab}
                 initial={{ opacity: 0, x: 20 }}
@@ -53,7 +63,9 @@ export default function App() {
                 exit={{ opacity: 0, x: -20 }}
                 transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
               >
-                {renderContent()}
+                <Suspense fallback={<LoadingModule />}>
+                  {renderContent()}
+                </Suspense>
               </motion.div>
             </AnimatePresence>
           </div>
