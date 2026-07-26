@@ -4,7 +4,10 @@ let aiInstance: GoogleGenAI | null = null;
 
 export function getGeminiAI() {
   if (!aiInstance) {
-    const apiKey = process.env.GEMINI_API_KEY;
+    let apiKey: string | undefined = undefined;
+    try {
+      apiKey = process.env.GEMINI_API_KEY;
+    } catch (_) {}
     if (!apiKey) {
       throw new Error("GEMINI_API_KEY is not defined in environment variables.");
     }
@@ -14,6 +17,9 @@ export function getGeminiAI() {
 }
 
 export async function askAiArchitect(prompt: string, context?: string) {
+  if (prompt.length > 4000) {
+    throw new Error("Input exceeds maximum allowed length of 4000 characters.");
+  }
   const ai = getGeminiAI();
   const systemInstruction = `You are "ArcSystem PRO", a high-end professional Architect and Construction AI Consultant. 
   Your capabilities include:
@@ -37,8 +43,16 @@ export async function askAiArchitect(prompt: string, context?: string) {
     });
 
     return response.text;
-  } catch (error) {
-    console.error("Gemini API Error:", error);
-    throw error;
+  } catch (error: any) {
+    let safeMessage = error instanceof Error ? error.message : String(error);
+    let apiKey: string | undefined = undefined;
+    try {
+      apiKey = process.env.GEMINI_API_KEY;
+    } catch (_) {}
+    if (apiKey) {
+      safeMessage = safeMessage.split(apiKey).join("[REDACTED]");
+    }
+    console.error("Gemini API Error:", safeMessage);
+    throw new Error("Gemini operation failed securely.");
   }
 }
