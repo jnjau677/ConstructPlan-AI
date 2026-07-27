@@ -34,6 +34,7 @@ export default function AiDesignAssistant() {
 
   const handleSend = async () => {
     if (!input.trim() || isLoading) return;
+    if (input.length > 4000) return;
 
     const userMsg = input.trim();
     setInput('');
@@ -105,18 +106,25 @@ export default function AiDesignAssistant() {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), handleSend())}
+              maxLength={4000}
               placeholder="Query zoning constraints, material lifecycle, or structural vectors..."
               className="w-full bg-[#020617] border border-slate-800 p-4 pr-16 rounded-2xl min-h-[100px] resize-none focus:outline-none focus:border-indigo-500 transition-all font-sans text-sm text-white placeholder-slate-600"
             />
             <button 
               onClick={handleSend}
-              disabled={isLoading || !input.trim()}
+              disabled={isLoading || !input.trim() || input.length > 4000}
+              aria-label="Send Message"
               className="absolute bottom-4 right-4 p-3 bg-indigo-600 text-white rounded-xl hover:bg-indigo-500 transition-all disabled:opacity-20 shadow-lg shadow-indigo-900/20"
             >
               <Send className="w-4 h-4" />
             </button>
           </div>
-          <p className="text-[9px] text-slate-600 mt-3 uppercase tracking-tighter text-center font-mono">Kernel: Gemini-3-Flash // Verify with local council data</p>
+          <div className="flex justify-between items-center mt-3">
+            <p className="text-[9px] text-slate-600 uppercase tracking-tighter font-mono">Kernel: Gemini-3-Flash // Verify with local council data</p>
+            <span className={`text-[9px] font-mono ${input.length > 3800 ? 'text-amber-500' : 'text-slate-600'}`}>
+              {input.length}/4000
+            </span>
+          </div>
         </div>
       </div>
 
