@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { 
   Mountain, 
   Scan, 
@@ -23,6 +23,23 @@ export default function SiteAnalysis() {
       prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]
     );
   };
+
+  /**
+   * Performance Optimization: Stabilize LiDAR points
+   *
+   * Pre-calculating and memoizing randomized point styles avoids recalculating style properties
+   * (width, height, left, top) using Math.random() on every re-render. This stabilizes the visual
+   * output, prevents jumpy/flickering layout calculations, and ensures clean animations.
+   */
+  const pointStyles = useMemo(() => {
+    return [...Array(15)].map((_, i) => ({
+      width: `${Math.random() * 300 + 100}px`,
+      height: `${Math.random() * 150 + 50}px`,
+      left: `${Math.random() * 100}%`,
+      top: `${Math.random() * 100}%`,
+      delay: i * 0.03,
+    }));
+  }, []);
 
   return (
     <div className="space-y-8">
@@ -128,18 +145,18 @@ export default function SiteAnalysis() {
               {/* Viz Overlays */}
               {activeLayer === 'lidar' && (
                 <div className="relative w-full h-full overflow-hidden">
-                  {[...Array(15)].map((_, i) => (
+                  {pointStyles.map((style, i) => (
                     <motion.div
                       key={i}
                       initial={{ scale: 0, opacity: 0 }}
                       animate={{ scale: 1, opacity: 0.15 }}
-                      transition={{ delay: i * 0.03 }}
+                      transition={{ delay: style.delay }}
                       className="absolute border border-indigo-500/40 rounded-lg bg-indigo-500/5 backdrop-blur-[1px]"
                       style={{
-                        width: `${Math.random() * 300 + 100}px`,
-                        height: `${Math.random() * 150 + 50}px`,
-                        left: `${Math.random() * 100}%`,
-                        top: `${Math.random() * 100}%`,
+                        width: style.width,
+                        height: style.height,
+                        left: style.left,
+                        top: style.top,
                         transform: 'translate(-50%, -50%) skew(15deg, -2deg)',
                       }}
                     />
