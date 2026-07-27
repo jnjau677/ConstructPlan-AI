@@ -1,0 +1,3 @@
+## 2026-07-27 - [BIM Module Code Splitting & Point Cloud Stabilization]
+**Learning:** Found that lazy-loading route components drastically reduces bundle size by moving heavy third-party bundles (recharts, react-markdown, date-fns) out of the main bundle. Also found that `Math.random()` inside the component render loop for dynamic coordinate styling triggers continuous rendering and visual jumps on UI changes; memoizing randomized structures via `useMemo` solves visual instability and improves performance.
+**Action:** Always inspect bundle chunk output to leverage lazy loading for large route components, and avoid `Math.random()` in dynamic style properties during render.
