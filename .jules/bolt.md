@@ -1,0 +1,3 @@
+## 2026-07-29 - Code Splitting & Framer Motion Integration
+**Learning:** Monolithic static imports in core routers (like `src/App.tsx`) bundle heavy dynamic libraries (e.g., `recharts`, `react-markdown`) into the main entry chunk, inflating initial load size (from ~337kB to ~960kB). When refactoring to `React.lazy` and `Suspense` within an animated workspace (`AnimatePresence`), placing the `Suspense` boundary outside the `motion.div` breaks Framer Motion's exit transitions because the wrapper loses reference during unmounting.
+**Action:** Always place `<Suspense>` boundaries inside the `<motion.div>` child of `<AnimatePresence>` when lazy-loading tab or page modules to ensure flawless transition animations.
