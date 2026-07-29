@@ -3,16 +3,20 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from 'react';
+import React, { useState, Suspense } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import Sidebar from './components/Sidebar.tsx';
-import Dashboard from './components/Dashboard.tsx';
-import EngineeringCalculators from './components/EngineeringCalculators.tsx';
-import AiDesignAssistant from './components/AiDesignAssistant.tsx';
-import SiteAnalysis from './components/SiteAnalysis.tsx';
-import TakeoffEstimator from './components/TakeoffEstimator.tsx';
-import SchematicStudio from './components/SchematicStudio.tsx';
-import SystemCapabilities from './components/SystemCapabilities.tsx';
+import LoadingModule from './components/LoadingModule.tsx';
+
+// Performance Optimization: Implement code splitting using React.lazy to divide the monolithic 960kB bundle.
+// This splits major bundle size contributors (such as recharts, date-fns, and react-markdown) into dynamic, on-demand chunks.
+const Dashboard = React.lazy(() => import('./components/Dashboard.tsx'));
+const SystemCapabilities = React.lazy(() => import('./components/SystemCapabilities.tsx'));
+const SchematicStudio = React.lazy(() => import('./components/SchematicStudio.tsx'));
+const EngineeringCalculators = React.lazy(() => import('./components/EngineeringCalculators.tsx'));
+const AiDesignAssistant = React.lazy(() => import('./components/AiDesignAssistant.tsx'));
+const SiteAnalysis = React.lazy(() => import('./components/SiteAnalysis.tsx'));
+const TakeoffEstimator = React.lazy(() => import('./components/TakeoffEstimator.tsx'));
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('overview');
@@ -53,7 +57,13 @@ export default function App() {
                 exit={{ opacity: 0, x: -20 }}
                 transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
               >
-                {renderContent()}
+                {/*
+                  Suspense is placed inside motion.div child of AnimatePresence to ensure
+                  Framer Motion's exit and enter animations function correctly during dynamic loads.
+                */}
+                <Suspense fallback={<LoadingModule />}>
+                  {renderContent()}
+                </Suspense>
               </motion.div>
             </AnimatePresence>
           </div>
