@@ -4,7 +4,12 @@ let aiInstance: GoogleGenAI | null = null;
 
 export function getGeminiAI() {
   if (!aiInstance) {
-    const apiKey = process.env.GEMINI_API_KEY;
+    let apiKey: string | undefined = undefined;
+    try {
+      apiKey = process.env.GEMINI_API_KEY;
+    } catch (e) {
+      // safe fallback if process is not defined in browser
+    }
     if (!apiKey) {
       throw new Error("GEMINI_API_KEY is not defined in environment variables.");
     }
@@ -14,6 +19,10 @@ export function getGeminiAI() {
 }
 
 export async function askAiArchitect(prompt: string, context?: string) {
+  if (prompt.length > 4000) {
+    throw new Error("Prompt exceeds the maximum character limit of 4000.");
+  }
+
   const ai = getGeminiAI();
   const systemInstruction = `You are "ArcSystem PRO", a high-end professional Architect and Construction AI Consultant. 
   Your capabilities include:
@@ -37,8 +46,22 @@ export async function askAiArchitect(prompt: string, context?: string) {
     });
 
     return response.text;
-  } catch (error) {
-    console.error("Gemini API Error:", error);
-    throw error;
+  } catch (error: any) {
+    // Sanitize error logging to prevent API key leakage
+    let apiKey: string | undefined = undefined;
+    try {
+      apiKey = process.env.GEMINI_API_KEY;
+    } catch (e) {
+      // safe fallback if process is not defined in browser
+    }
+    let errorMessage = error instanceof Error ? error.stack || error.message : String(error);
+    if (apiKey) {
+      // Escape special regex characters in apiKey just in case
+      const escapedKey = apiKey.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+      const regex = new RegExp(escapedKey, 'g');
+      errorMessage = errorMessage.replace(regex, '[REDACTED_API_KEY]');
+    }
+    console.error("Gemini API Error:", errorMessage);
+    throw new Error("An error occurred during AI processing. Stack traces and sensitive credentials have been securely redacted.");
   }
 }
