@@ -36,6 +36,14 @@ export default function AiDesignAssistant() {
     if (!input.trim() || isLoading) return;
 
     const userMsg = input.trim();
+    if (userMsg.length > 4000) {
+      setMessages(prev => [...prev, {
+        role: 'assistant',
+        content: '⚠️ **Error:** Your input exceeds the maximum safety limit of 4000 characters. Please shorten your prompt.'
+      }]);
+      return;
+    }
+
     setInput('');
     setMessages(prev => [...prev, { role: 'user', content: userMsg }]);
     setIsLoading(true);
@@ -106,6 +114,7 @@ export default function AiDesignAssistant() {
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), handleSend())}
               placeholder="Query zoning constraints, material lifecycle, or structural vectors..."
+              maxLength={4000}
               className="w-full bg-[#020617] border border-slate-800 p-4 pr-16 rounded-2xl min-h-[100px] resize-none focus:outline-none focus:border-indigo-500 transition-all font-sans text-sm text-white placeholder-slate-600"
             />
             <button 
@@ -116,7 +125,12 @@ export default function AiDesignAssistant() {
               <Send className="w-4 h-4" />
             </button>
           </div>
-          <p className="text-[9px] text-slate-600 mt-3 uppercase tracking-tighter text-center font-mono">Kernel: Gemini-3-Flash // Verify with local council data</p>
+          <div className="flex justify-between items-center mt-3">
+            <p className="text-[9px] text-slate-600 uppercase tracking-tighter font-mono">Kernel: Gemini-3-Flash // Verify with local council data</p>
+            <p className={`text-[9px] font-mono transition-colors ${input.length >= 3800 ? 'text-amber-500 font-bold' : 'text-slate-600'}`}>
+              {input.length}/4000
+            </p>
+          </div>
         </div>
       </div>
 
