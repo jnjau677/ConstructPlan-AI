@@ -4,7 +4,12 @@ let aiInstance: GoogleGenAI | null = null;
 
 export function getGeminiAI() {
   if (!aiInstance) {
-    const apiKey = process.env.GEMINI_API_KEY;
+    let apiKey: string | undefined = undefined;
+    try {
+      apiKey = process.env.GEMINI_API_KEY;
+    } catch (e) {
+      // Safe fallback if process is not defined
+    }
     if (!apiKey) {
       throw new Error("GEMINI_API_KEY is not defined in environment variables.");
     }
@@ -13,7 +18,38 @@ export function getGeminiAI() {
   return aiInstance;
 }
 
+function sanitizeError(error: any): Error {
+  let apiKey: string | undefined = undefined;
+  try {
+    apiKey = process.env.GEMINI_API_KEY;
+  } catch (e) {
+    // Safe fallback if process is not defined
+  }
+  if (!apiKey) return error instanceof Error ? error : new Error(String(error));
+
+  const errorMsg = error instanceof Error ? error.message : String(error);
+  const errorStack = error instanceof Error ? error.stack : undefined;
+
+  // Escape API key special characters for RegExp pattern
+  const escapedKey = apiKey.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const regex = new RegExp(escapedKey, 'g');
+
+  const sanitizedMsg = errorMsg.replace(regex, '[REDACTED_API_KEY]');
+  const sanitizedError = new Error(sanitizedMsg);
+
+  if (errorStack) {
+    sanitizedError.stack = errorStack.replace(regex, '[REDACTED_API_KEY]');
+  }
+
+  return sanitizedError;
+}
+
 export async function askAiArchitect(prompt: string, context?: string) {
+  // Input validation: Enforce a character limit of 4000 to prevent payload size issues
+  if (prompt.length > 4000) {
+    throw new Error("Input exceeds maximum character limit of 4000.");
+  }
+
   const ai = getGeminiAI();
   const systemInstruction = `You are "ArcSystem PRO", a high-end professional Architect and Construction AI Consultant. 
   Your capabilities include:
@@ -38,7 +74,8 @@ export async function askAiArchitect(prompt: string, context?: string) {
 
     return response.text;
   } catch (error) {
-    console.error("Gemini API Error:", error);
-    throw error;
+    const sanitized = sanitizeError(error);
+    console.error("Gemini API Error:", sanitized.message);
+    throw sanitized;
   }
 }
