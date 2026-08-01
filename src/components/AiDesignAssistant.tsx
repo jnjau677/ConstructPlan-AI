@@ -36,6 +36,11 @@ export default function AiDesignAssistant() {
     if (!input.trim() || isLoading) return;
 
     const userMsg = input.trim();
+    if (userMsg.length > 4000) {
+      setMessages(prev => [...prev, { role: 'assistant', content: 'Input exceeds the maximum character limit of 4000.' }]);
+      return;
+    }
+
     setInput('');
     setMessages(prev => [...prev, { role: 'user', content: userMsg }]);
     setIsLoading(true);
@@ -106,6 +111,7 @@ export default function AiDesignAssistant() {
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), handleSend())}
               placeholder="Query zoning constraints, material lifecycle, or structural vectors..."
+              maxLength={4000}
               className="w-full bg-[#020617] border border-slate-800 p-4 pr-16 rounded-2xl min-h-[100px] resize-none focus:outline-none focus:border-indigo-500 transition-all font-sans text-sm text-white placeholder-slate-600"
             />
             <button 
