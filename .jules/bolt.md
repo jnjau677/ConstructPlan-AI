@@ -1,0 +1,3 @@
+## 2026-08-01 - React.lazy Code-Splitting with Framer Motion AnimatePresence
+**Learning:** When using Framer Motion's `AnimatePresence` with lazy-loaded components under `React.lazy`, the `<Suspense>` boundary must be nested inside the child `<motion.div>` (or motion component). If `<Suspense>` wraps `<motion.div>` or `<AnimatePresence>` directly, exit transitions fail because the unmounting tree gets interrupted/restructured prematurely by the Suspense resolution mechanism.
+**Action:** Always place the `<Suspense>` boundary inside the individual `<motion.div>` children when code-splitting views controlled by `AnimatePresence`.
