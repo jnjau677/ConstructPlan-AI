@@ -14,6 +14,13 @@ export function getGeminiAI() {
 }
 
 export async function askAiArchitect(prompt: string, context?: string) {
+  if (!prompt || typeof prompt !== "string") {
+    throw new Error("Invalid input: Prompt must be a non-empty string.");
+  }
+  if (prompt.length > 4000) {
+    throw new Error("Input exceeds the maximum character limit of 4000.");
+  }
+
   const ai = getGeminiAI();
   const systemInstruction = `You are "ArcSystem PRO", a high-end professional Architect and Construction AI Consultant. 
   Your capabilities include:
@@ -38,7 +45,13 @@ export async function askAiArchitect(prompt: string, context?: string) {
 
     return response.text;
   } catch (error) {
-    console.error("Gemini API Error:", error);
-    throw error;
+    const apiKey = process.env.GEMINI_API_KEY;
+    const rawMsg = error instanceof Error ? error.message : String(error);
+    const sanitizedMsg = apiKey
+      ? rawMsg.replace(new RegExp(apiKey.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&'), "g"), "[REDACTED_API_KEY]")
+      : rawMsg;
+    console.error("Gemini API Error:", sanitizedMsg);
+    // Fail securely by providing a generic error message
+    throw new Error("BIM cluster query execution failure.");
   }
 }
