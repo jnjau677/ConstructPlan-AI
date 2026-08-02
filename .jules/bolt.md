@@ -1,0 +1,3 @@
+## 2026-08-02 - Framer Motion AnimatePresence and Lazy Loading
+**Learning:** When using Framer Motion's `AnimatePresence` with lazy-loaded components via `React.lazy`, placing the `Suspense` boundary outside of the `motion.div` can break exit animations or cause visual glitching because Framer Motion needs the layout keys to remain stable and alive during the animation phase. Placing the `Suspense` boundary inside the `motion.div` child ensures that enter/exit transitions are correctly handled and the fallback is shown gracefully.
+**Action:** Always wrap the lazy-loaded content with `Suspense` inside the `motion.div` transition container, rather than wrapping the `motion.div` itself.
