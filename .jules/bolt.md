@@ -1,0 +1,3 @@
+## 2025-08-02 - Code Splitting with Framer Motion AnimatePresence
+**Learning:** In projects utilizing Framer Motion's `<AnimatePresence>` for tab content transitions, lazy-loading module components with standard `<Suspense>` boundaries wrapping the `<motion.div>` can disrupt enter/exit animations. To prevent transition jank, the `<Suspense>` boundary must be nested directly inside the `<motion.div>` child.
+**Action:** When lazy-loading animated components, always position the `<Suspense>` fallback boundary inside the `<motion.div>` transition block so that exit animations are handled gracefully during bundle chunk resolution.
