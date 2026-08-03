@@ -4,7 +4,12 @@ let aiInstance: GoogleGenAI | null = null;
 
 export function getGeminiAI() {
   if (!aiInstance) {
-    const apiKey = process.env.GEMINI_API_KEY;
+    let apiKey: string | undefined;
+    try {
+      apiKey = typeof process !== "undefined" && process.env ? process.env.GEMINI_API_KEY : undefined;
+    } catch {
+      apiKey = undefined;
+    }
     if (!apiKey) {
       throw new Error("GEMINI_API_KEY is not defined in environment variables.");
     }
@@ -14,6 +19,10 @@ export function getGeminiAI() {
 }
 
 export async function askAiArchitect(prompt: string, context?: string) {
+  if (prompt.length > 4000 || (context && context.length + prompt.length > 4000)) {
+    throw new Error("Prompt length exceeds the 4000-character limit.");
+  }
+
   const ai = getGeminiAI();
   const systemInstruction = `You are "ArcSystem PRO", a high-end professional Architect and Construction AI Consultant. 
   Your capabilities include:
@@ -38,7 +47,12 @@ export async function askAiArchitect(prompt: string, context?: string) {
 
     return response.text;
   } catch (error) {
-    console.error("Gemini API Error:", error);
-    throw error;
+    // Sanitize any error output to prevent credential leaks (AIzaSy API Key pattern)
+    const errString = String(error);
+    const sanitizedError = errString
+      .replace(/AIza[0-9A-Za-z-_]{35}/g, "[REDACTED_API_KEY]")
+      .replace(/GEMINI_API_KEY/g, "[REDACTED_VARIABLE]");
+    console.error("Gemini API Error:", sanitizedError);
+    throw new Error("An error occurred during communication with the AI module.");
   }
 }
