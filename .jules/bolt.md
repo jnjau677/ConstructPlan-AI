@@ -1,0 +1,3 @@
+## 2026-08-03 - Stabilizing Randomized LiDAR Points in SiteAnalysis
+**Learning:** In components displaying heavy visual elements driven by random data (e.g. LiDAR point clouds in Topo Studio), placing `Math.random()` or dynamic generator logic directly within the render path acts as a performance anti-pattern. This causes the random layout parameters (widths, heights, offsets) to be recalculated on every single component update or state toggle, triggering visual stutters, layout shifts, and heavy rendering overhead.
+**Action:** Always wrap any randomized coordinate or style generator functions in a `useMemo` hook with an empty dependency array to compute the random parameters exactly once on initial mount and keep them stable across subsequent re-renders.
