@@ -1,0 +1,3 @@
+## 2026-08-04 - Stabilizing Layout & Bundle Size via Code Splitting and useMemo
+**Learning:** Codebases using dynamic UI libraries (like recharts, date-fns, react-markdown) can suffer from massive initial bundles (upwards of 900kB), which can be reduced by ~65% using React.lazy & Suspense. Additionally, heavy visual elements driven by random data (like LiDAR visualizations) must use `useMemo` to stabilize random properties, preventing layout thrashing and jumpiness on state updates.
+**Action:** Always code-split page/module-level route components, and avoid `Math.random()` directly in render blocks for layout coordinates.
