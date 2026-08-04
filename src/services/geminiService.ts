@@ -4,7 +4,12 @@ let aiInstance: GoogleGenAI | null = null;
 
 export function getGeminiAI() {
   if (!aiInstance) {
-    const apiKey = process.env.GEMINI_API_KEY;
+    let apiKey: string | undefined;
+    try {
+      apiKey = process.env.GEMINI_API_KEY;
+    } catch (e) {
+      // In browser-based environments, process might not be defined.
+    }
     if (!apiKey) {
       throw new Error("GEMINI_API_KEY is not defined in environment variables.");
     }
@@ -14,6 +19,14 @@ export function getGeminiAI() {
 }
 
 export async function askAiArchitect(prompt: string, context?: string) {
+  // Input Validation: Enforce 4000-character limit to prevent payload issues and DoS
+  if (!prompt || prompt.trim().length > 4000) {
+    throw new Error("Input validation failed: Prompt must not be empty or exceed 4000 characters.");
+  }
+  if (context && context.trim().length > 4000) {
+    throw new Error("Input validation failed: Context must not exceed 4000 characters.");
+  }
+
   const ai = getGeminiAI();
   const systemInstruction = `You are "ArcSystem PRO", a high-end professional Architect and Construction AI Consultant. 
   Your capabilities include:
@@ -37,8 +50,11 @@ export async function askAiArchitect(prompt: string, context?: string) {
     });
 
     return response.text;
-  } catch (error) {
-    console.error("Gemini API Error:", error);
-    throw error;
+  } catch (error: any) {
+    // Sanitize console logging to prevent potential secret/token leakage or stack trace exposure
+    const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
+    console.error("Gemini API Error occurred in request processing:", errorMessage);
+    // Fail securely: Throw generic message to client to hide backend/stack details
+    throw new Error("An error occurred in the Gemini service. Details have been hidden for security.");
   }
 }
