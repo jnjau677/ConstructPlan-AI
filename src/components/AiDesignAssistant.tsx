@@ -35,7 +35,8 @@ export default function AiDesignAssistant() {
   const handleSend = async () => {
     if (!input.trim() || isLoading) return;
 
-    const userMsg = input.trim();
+    // SECURITY: Enforce strict 4000-character input validation on userMsg (Defense in Depth)
+    const userMsg = input.trim().slice(0, 4000);
     setInput('');
     setMessages(prev => [...prev, { role: 'user', content: userMsg }]);
     setIsLoading(true);
@@ -103,20 +104,28 @@ export default function AiDesignAssistant() {
           <div className="relative">
             <textarea
               value={input}
-              onChange={(e) => setInput(e.target.value)}
+              onChange={(e) => setInput(e.target.value.slice(0, 4000))}
               onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), handleSend())}
               placeholder="Query zoning constraints, material lifecycle, or structural vectors..."
+              maxLength={4000}
+              aria-label="Design assistant query input"
               className="w-full bg-[#020617] border border-slate-800 p-4 pr-16 rounded-2xl min-h-[100px] resize-none focus:outline-none focus:border-indigo-500 transition-all font-sans text-sm text-white placeholder-slate-600"
             />
             <button 
               onClick={handleSend}
               disabled={isLoading || !input.trim()}
+              aria-label="Send message to AI assistant"
               className="absolute bottom-4 right-4 p-3 bg-indigo-600 text-white rounded-xl hover:bg-indigo-500 transition-all disabled:opacity-20 shadow-lg shadow-indigo-900/20"
             >
               <Send className="w-4 h-4" />
             </button>
           </div>
-          <p className="text-[9px] text-slate-600 mt-3 uppercase tracking-tighter text-center font-mono">Kernel: Gemini-3-Flash // Verify with local council data</p>
+          <div className="flex justify-between items-center mt-3">
+            <p className="text-[9px] text-slate-600 uppercase tracking-tighter font-mono">Kernel: Gemini-3-Flash // Verify with local council data</p>
+            <span className={`text-[10px] font-mono ${input.length > 3800 ? 'text-amber-500 font-bold' : 'text-slate-500'}`} aria-live="polite">
+              {input.length} / 4000
+            </span>
+          </div>
         </div>
       </div>
 

@@ -14,6 +14,11 @@ export function getGeminiAI() {
 }
 
 export async function askAiArchitect(prompt: string, context?: string) {
+  // SECURITY: Validate input and enforce strict 4000-character limits to prevent payload size issues/DoS.
+  if (typeof prompt !== "string" || prompt.length > 4000) {
+    throw new Error("Security Violation: Prompt exceeds maximum character limit of 4000.");
+  }
+
   const ai = getGeminiAI();
   const systemInstruction = `You are "ArcSystem PRO", a high-end professional Architect and Construction AI Consultant. 
   Your capabilities include:
@@ -37,8 +42,13 @@ export async function askAiArchitect(prompt: string, context?: string) {
     });
 
     return response.text;
-  } catch (error) {
-    console.error("Gemini API Error:", error);
-    throw error;
+  } catch (error: any) {
+    // SECURITY: Sanitize the error log to prevent exposing system prompts, sensitive API keys, or full stack traces in the client-side console.
+    const rawMessage = error instanceof Error ? error.message : String(error);
+    const sanitizedMessage = rawMessage.replace(/AIza[0-9A-Za-z-_]{35}/g, "[REDACTED_API_KEY]");
+    console.error("Gemini API Error:", sanitizedMessage);
+
+    // SECURITY: Throw a generic user-safe error message rather than exposing library-specific internal details.
+    throw new Error("Apologies, I encountered a technical latency in the BIM cluster. Please re-initialize.");
   }
 }
