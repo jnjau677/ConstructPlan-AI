@@ -1,0 +1,3 @@
+## 2026-03-05 - Stabilizing Random LiDAR Point Cloud Layout Properties
+**Learning:** Using inline `Math.random()` for layout styles (like `width`, `height`, `left`, `top`) inside list rendering loops causes severe layout shifts, visual jitter, and redundant calculations for Framer Motion on every component update. Memoizing random visual properties stabilizes the layout and dramatically improves animation smoothness.
+**Action:** Always use React `useMemo` with an empty dependency array to generate and stabilize random/mock values for visual layout elements that are rendered conditionally or react to user interactions.

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { 
   Mountain, 
   Scan, 
@@ -17,6 +17,20 @@ import { motion } from 'motion/react';
 export default function SiteAnalysis() {
   const [activeLayer, setActiveLayer] = useState('lidar');
   const [activeOverlays, setActiveOverlays] = useState<string[]>([]);
+
+  // BOLT PERFORMANCE OPTIMIZATION:
+  // Stabilize the random properties of the 15 visualization blocks using useMemo.
+  // This prevents continuous layout shifts, visual jittering, and unnecessary
+  // re-calculations for Framer Motion's motion.div on every component re-render.
+  const lidarPoints = useMemo(() => {
+    return Array.from({ length: 15 }, (_, i) => ({
+      id: i,
+      width: Math.random() * 300 + 100,
+      height: Math.random() * 150 + 50,
+      left: Math.random() * 100,
+      top: Math.random() * 100,
+    }));
+  }, []);
 
   const toggleOverlay = (id: string) => {
     setActiveOverlays(prev => 
@@ -128,18 +142,18 @@ export default function SiteAnalysis() {
               {/* Viz Overlays */}
               {activeLayer === 'lidar' && (
                 <div className="relative w-full h-full overflow-hidden">
-                  {[...Array(15)].map((_, i) => (
+                  {lidarPoints.map((point) => (
                     <motion.div
-                      key={i}
+                      key={point.id}
                       initial={{ scale: 0, opacity: 0 }}
                       animate={{ scale: 1, opacity: 0.15 }}
-                      transition={{ delay: i * 0.03 }}
+                      transition={{ delay: point.id * 0.03 }}
                       className="absolute border border-indigo-500/40 rounded-lg bg-indigo-500/5 backdrop-blur-[1px]"
                       style={{
-                        width: `${Math.random() * 300 + 100}px`,
-                        height: `${Math.random() * 150 + 50}px`,
-                        left: `${Math.random() * 100}%`,
-                        top: `${Math.random() * 100}%`,
+                        width: `${point.width}px`,
+                        height: `${point.height}px`,
+                        left: `${point.left}%`,
+                        top: `${point.top}%`,
                         transform: 'translate(-50%, -50%) skew(15deg, -2deg)',
                       }}
                     />
