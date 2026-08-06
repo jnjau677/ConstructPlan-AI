@@ -4,7 +4,12 @@ let aiInstance: GoogleGenAI | null = null;
 
 export function getGeminiAI() {
   if (!aiInstance) {
-    const apiKey = process.env.GEMINI_API_KEY;
+    let apiKey: string | undefined;
+    try {
+      apiKey = process.env.GEMINI_API_KEY;
+    } catch (e) {
+      // Safe fallback if process is not defined at runtime in browser
+    }
     if (!apiKey) {
       throw new Error("GEMINI_API_KEY is not defined in environment variables.");
     }
@@ -14,6 +19,11 @@ export function getGeminiAI() {
 }
 
 export async function askAiArchitect(prompt: string, context?: string) {
+  // Input validation - enforce a strict 4000-character limit to prevent DoS/payload size issues
+  if (prompt.length > 4000) {
+    throw new Error("Payload size limit exceeded: Input must not exceed 4000 characters.");
+  }
+
   const ai = getGeminiAI();
   const systemInstruction = `You are "ArcSystem PRO", a high-end professional Architect and Construction AI Consultant. 
   Your capabilities include:
@@ -37,8 +47,22 @@ export async function askAiArchitect(prompt: string, context?: string) {
     });
 
     return response.text;
-  } catch (error) {
-    console.error("Gemini API Error:", error);
-    throw error;
+  } catch (error: any) {
+    // Sanitize any potential credential leak in console error logging.
+    let errorMessage = error instanceof Error ? error.message : String(error);
+
+    let apiKey: string | undefined;
+    try {
+      apiKey = process.env.GEMINI_API_KEY;
+    } catch (e) {}
+
+    if (apiKey && apiKey.length > 0) {
+      errorMessage = errorMessage.split(apiKey).join("[REDACTED_API_KEY]");
+    }
+
+    console.error("Gemini API Error: [Sanitized]", errorMessage);
+
+    // Fail securely by providing a generic error message, avoiding exposure of stack traces
+    throw new Error("Apologies, I encountered a technical latency in the BIM cluster. Please re-initialize.");
   }
 }

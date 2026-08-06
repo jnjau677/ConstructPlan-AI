@@ -36,6 +36,15 @@ export default function AiDesignAssistant() {
     if (!input.trim() || isLoading) return;
 
     const userMsg = input.trim();
+    if (userMsg.length > 4000) {
+      setMessages(prev => [
+        ...prev,
+        { role: 'user', content: userMsg },
+        { role: 'assistant', content: 'Payload size limit exceeded: Input must not exceed 4000 characters.' }
+      ]);
+      return;
+    }
+
     setInput('');
     setMessages(prev => [...prev, { role: 'user', content: userMsg }]);
     setIsLoading(true);
@@ -43,8 +52,9 @@ export default function AiDesignAssistant() {
     try {
       const response = await askAiArchitect(userMsg);
       setMessages(prev => [...prev, { role: 'assistant', content: response || 'No response generated.' }]);
-    } catch (error) {
-      setMessages(prev => [...prev, { role: 'assistant', content: 'Apologies, I encountered a technical latency in the BIM cluster. Please re-initialize.' }]);
+    } catch (error: any) {
+      const fallbackMsg = error instanceof Error ? error.message : 'Apologies, I encountered a technical latency in the BIM cluster. Please re-initialize.';
+      setMessages(prev => [...prev, { role: 'assistant', content: fallbackMsg }]);
     } finally {
       setIsLoading(false);
     }
@@ -105,9 +115,15 @@ export default function AiDesignAssistant() {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), handleSend())}
+              maxLength={4000}
               placeholder="Query zoning constraints, material lifecycle, or structural vectors..."
               className="w-full bg-[#020617] border border-slate-800 p-4 pr-16 rounded-2xl min-h-[100px] resize-none focus:outline-none focus:border-indigo-500 transition-all font-sans text-sm text-white placeholder-slate-600"
             />
+            {input.length >= 3500 && (
+              <div className="absolute right-16 top-4 text-[10px] text-amber-500 font-mono animate-pulse">
+                {input.length}/4000
+              </div>
+            )}
             <button 
               onClick={handleSend}
               disabled={isLoading || !input.trim()}
