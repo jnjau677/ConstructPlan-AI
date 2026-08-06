@@ -18,6 +18,18 @@ export default function SiteAnalysis() {
   const [activeLayer, setActiveLayer] = useState('lidar');
   const [activeOverlays, setActiveOverlays] = useState<string[]>([]);
 
+  // Memoize random coordinates and sizes for the 15 point cloud visualization blocks
+  // to avoid layout shifts, visual jittering, and continuous re-calculation on every re-render.
+  const lidarPoints = React.useMemo(() => {
+    return [...Array(15)].map((_, i) => ({
+      width: `${Math.random() * 300 + 100}px`,
+      height: `${Math.random() * 150 + 50}px`,
+      left: `${Math.random() * 100}%`,
+      top: `${Math.random() * 100}%`,
+      delay: i * 0.03,
+    }));
+  }, []);
+
   const toggleOverlay = (id: string) => {
     setActiveOverlays(prev => 
       prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]
@@ -128,18 +140,18 @@ export default function SiteAnalysis() {
               {/* Viz Overlays */}
               {activeLayer === 'lidar' && (
                 <div className="relative w-full h-full overflow-hidden">
-                  {[...Array(15)].map((_, i) => (
+                  {lidarPoints.map((point, i) => (
                     <motion.div
                       key={i}
                       initial={{ scale: 0, opacity: 0 }}
                       animate={{ scale: 1, opacity: 0.15 }}
-                      transition={{ delay: i * 0.03 }}
+                      transition={{ delay: point.delay }}
                       className="absolute border border-indigo-500/40 rounded-lg bg-indigo-500/5 backdrop-blur-[1px]"
                       style={{
-                        width: `${Math.random() * 300 + 100}px`,
-                        height: `${Math.random() * 150 + 50}px`,
-                        left: `${Math.random() * 100}%`,
-                        top: `${Math.random() * 100}%`,
+                        width: point.width,
+                        height: point.height,
+                        left: point.left,
+                        top: point.top,
                         transform: 'translate(-50%, -50%) skew(15deg, -2deg)',
                       }}
                     />
