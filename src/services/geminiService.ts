@@ -2,9 +2,35 @@ import { GoogleGenAI } from "@google/genai";
 
 let aiInstance: GoogleGenAI | null = null;
 
+function sanitizeError(error: any, apiKey?: string): Error {
+  if (!error) return new Error("Unknown error");
+  let msg = typeof error === "string" ? error : error.message || String(error);
+  let stack = error.stack || "";
+
+  if (apiKey && apiKey.length > 5) {
+    const escapedKey = apiKey.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+    const keyRegex = new RegExp(escapedKey, 'g');
+    msg = msg.replace(keyRegex, '[REDACTED_API_KEY]');
+    stack = stack.replace(keyRegex, '[REDACTED_API_KEY]');
+  }
+
+  const genericApiKeyRegex = /AIzaSy[A-Za-z0-9-_]{33}/g;
+  msg = msg.replace(genericApiKeyRegex, '[REDACTED_API_KEY]');
+  stack = stack.replace(genericApiKeyRegex, '[REDACTED_API_KEY]');
+
+  const sanitized = new Error(msg);
+  sanitized.stack = stack;
+  return sanitized;
+}
+
 export function getGeminiAI() {
   if (!aiInstance) {
-    const apiKey = process.env.GEMINI_API_KEY;
+    let apiKey: string | undefined;
+    try {
+      apiKey = process.env.GEMINI_API_KEY;
+    } catch (e) {
+      // process may not be defined in some browser environments
+    }
     if (!apiKey) {
       throw new Error("GEMINI_API_KEY is not defined in environment variables.");
     }
@@ -14,6 +40,20 @@ export function getGeminiAI() {
 }
 
 export async function askAiArchitect(prompt: string, context?: string) {
+  if (!prompt || typeof prompt !== 'string') {
+    throw new Error("Invalid prompt provided.");
+  }
+  if (prompt.length > 4000) {
+    throw new Error("Prompt exceeds maximum allowed length of 4000 characters.");
+  }
+
+  let apiKey: string | undefined;
+  try {
+    apiKey = process.env.GEMINI_API_KEY;
+  } catch (e) {
+    // Fail-safe if process is not defined
+  }
+
   const ai = getGeminiAI();
   const systemInstruction = `You are "ArcSystem PRO", a high-end professional Architect and Construction AI Consultant. 
   Your capabilities include:
@@ -38,7 +78,8 @@ export async function askAiArchitect(prompt: string, context?: string) {
 
     return response.text;
   } catch (error) {
-    console.error("Gemini API Error:", error);
-    throw error;
+    const sanitized = sanitizeError(error, apiKey);
+    console.error("Gemini API Error:", sanitized.message);
+    throw sanitized;
   }
 }
