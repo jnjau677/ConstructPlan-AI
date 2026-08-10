@@ -1,0 +1,3 @@
+## 2026-08-10 - Optimizing Initial Bundle Size via React.lazy Dynamic Imports
+**Learning:** Heavy libraries like `recharts` (used in Dashboard), `date-fns` (used in Dashboard), and `react-markdown` (used in AiDesignAssistant) contribute significantly to the initial JavaScript bundle size, inflating it to ~960 kB and hurting Initial Load Time and TTI. Implementing dynamic code splitting via `React.lazy` and `Suspense` inside `AnimatePresence` allows loading these components on-demand.
+**Action:** Always wrap dynamically imported sub-modules inside a `<Suspense>` boundary directly *inside* the Framer Motion `<motion.div>` wrapper to maintain exit/enter animations cleanly while saving initial asset sizes.
