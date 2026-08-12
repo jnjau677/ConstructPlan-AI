@@ -13,7 +13,33 @@ export function getGeminiAI() {
   return aiInstance;
 }
 
+function sanitizeError(error: unknown): string {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!error) return "Unknown error";
+
+  let msg = "";
+  if (error instanceof Error) {
+    msg = `${error.name}: ${error.message}`;
+    if (error.stack) {
+      msg += `\nStack: ${error.stack}`;
+    }
+  } else {
+    msg = String(error);
+  }
+
+  if (apiKey) {
+    msg = msg.split(apiKey).join("[REDACTED_API_KEY]");
+  }
+  return msg;
+}
+
 export async function askAiArchitect(prompt: string, context?: string) {
+  // Input validation
+  const totalLength = prompt.length + (context ? context.length : 0);
+  if (totalLength > 4000) {
+    throw new Error("Input payload exceeds maximum allowed security limit of 4000 characters.");
+  }
+
   const ai = getGeminiAI();
   const systemInstruction = `You are "ArcSystem PRO", a high-end professional Architect and Construction AI Consultant. 
   Your capabilities include:
@@ -38,7 +64,8 @@ export async function askAiArchitect(prompt: string, context?: string) {
 
     return response.text;
   } catch (error) {
-    console.error("Gemini API Error:", error);
-    throw error;
+    const safeErrorMsg = sanitizeError(error);
+    console.error("Gemini API Error:", safeErrorMsg);
+    throw new Error("BIM cluster query failed due to system latency or API communication issue.");
   }
 }

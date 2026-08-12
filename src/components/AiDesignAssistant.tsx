@@ -36,6 +36,16 @@ export default function AiDesignAssistant() {
     if (!input.trim() || isLoading) return;
 
     const userMsg = input.trim();
+    // Security check: Validate input length limit
+    if (userMsg.length > 4000) {
+      setMessages(prev => [
+        ...prev,
+        { role: 'user', content: userMsg.slice(0, 60) + '...' },
+        { role: 'assistant', content: 'Error: Input exceeds the maximum security limit of 4000 characters.' }
+      ]);
+      return;
+    }
+
     setInput('');
     setMessages(prev => [...prev, { role: 'user', content: userMsg }]);
     setIsLoading(true);
@@ -105,11 +115,13 @@ export default function AiDesignAssistant() {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), handleSend())}
+              maxLength={4000}
               placeholder="Query zoning constraints, material lifecycle, or structural vectors..."
               className="w-full bg-[#020617] border border-slate-800 p-4 pr-16 rounded-2xl min-h-[100px] resize-none focus:outline-none focus:border-indigo-500 transition-all font-sans text-sm text-white placeholder-slate-600"
             />
             <button 
               onClick={handleSend}
+              aria-label="Send message"
               disabled={isLoading || !input.trim()}
               className="absolute bottom-4 right-4 p-3 bg-indigo-600 text-white rounded-xl hover:bg-indigo-500 transition-all disabled:opacity-20 shadow-lg shadow-indigo-900/20"
             >
