@@ -24,6 +24,18 @@ export default function SiteAnalysis() {
     );
   };
 
+  // Memoize random coordinates and dimensions for the 15 point-cloud boxes
+  // to avoid performance bottlenecks, continuous layout shifts, and visual jittering
+  // on component re-renders.
+  const lidarBlocks = React.useMemo(() => {
+    return [...Array(15)].map(() => ({
+      width: `${Math.random() * 300 + 100}px`,
+      height: `${Math.random() * 150 + 50}px`,
+      left: `${Math.random() * 100}%`,
+      top: `${Math.random() * 100}%`,
+    }));
+  }, []);
+
   return (
     <div className="space-y-8">
       <header className="flex justify-between items-end bg-slate-900/40 p-8 rounded-3xl border border-slate-800 backdrop-blur-sm">
@@ -128,7 +140,7 @@ export default function SiteAnalysis() {
               {/* Viz Overlays */}
               {activeLayer === 'lidar' && (
                 <div className="relative w-full h-full overflow-hidden">
-                  {[...Array(15)].map((_, i) => (
+                  {lidarBlocks.map((block, i) => (
                     <motion.div
                       key={i}
                       initial={{ scale: 0, opacity: 0 }}
@@ -136,10 +148,10 @@ export default function SiteAnalysis() {
                       transition={{ delay: i * 0.03 }}
                       className="absolute border border-indigo-500/40 rounded-lg bg-indigo-500/5 backdrop-blur-[1px]"
                       style={{
-                        width: `${Math.random() * 300 + 100}px`,
-                        height: `${Math.random() * 150 + 50}px`,
-                        left: `${Math.random() * 100}%`,
-                        top: `${Math.random() * 100}%`,
+                        width: block.width,
+                        height: block.height,
+                        left: block.left,
+                        top: block.top,
                         transform: 'translate(-50%, -50%) skew(15deg, -2deg)',
                       }}
                     />
