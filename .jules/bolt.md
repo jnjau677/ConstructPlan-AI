@@ -1,0 +1,3 @@
+## 2026-08-12 - Prevent Jitter and Layout Shifts in Heavy Dynamic Visualizations
+**Learning:** Calling `Math.random()` inside the React render mapping loop of custom visualization components (such as LiDAR point cloud boxes in `SiteAnalysis.tsx`) causes random properties (sizes, coordinates) to regenerate on every single component re-render (e.g., when toggling overlays or state). This results in extreme visual jitter, continuous layout shifts, and costly layout recalculations or repaints.
+**Action:** Use `useMemo` with an empty or constant dependency array to generate and stabilize random coordinate and dimension properties once on mount, ensuring smooth renders and zero layout shifts.
