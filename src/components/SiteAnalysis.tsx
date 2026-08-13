@@ -14,9 +14,27 @@ import {
 } from 'lucide-react';
 import { motion } from 'motion/react';
 
+interface LidarBlock {
+  width: string;
+  height: string;
+  left: string;
+  top: string;
+}
+
 export default function SiteAnalysis() {
   const [activeLayer, setActiveLayer] = useState('lidar');
   const [activeOverlays, setActiveOverlays] = useState<string[]>([]);
+
+  // Bolt: Memoize the 15 visualization blocks to stabilize their random dimensions and coordinates,
+  // preventing constant layout shifts and visual jittering when the component re-renders (e.g. toggling overlays).
+  const lidarBlocks = React.useMemo<LidarBlock[]>(() => {
+    return [...Array(15)].map(() => ({
+      width: `${Math.random() * 300 + 100}px`,
+      height: `${Math.random() * 150 + 50}px`,
+      left: `${Math.random() * 100}%`,
+      top: `${Math.random() * 100}%`,
+    }));
+  }, []);
 
   const toggleOverlay = (id: string) => {
     setActiveOverlays(prev => 
@@ -128,7 +146,7 @@ export default function SiteAnalysis() {
               {/* Viz Overlays */}
               {activeLayer === 'lidar' && (
                 <div className="relative w-full h-full overflow-hidden">
-                  {[...Array(15)].map((_, i) => (
+                  {lidarBlocks.map((block, i) => (
                     <motion.div
                       key={i}
                       initial={{ scale: 0, opacity: 0 }}
@@ -136,10 +154,10 @@ export default function SiteAnalysis() {
                       transition={{ delay: i * 0.03 }}
                       className="absolute border border-indigo-500/40 rounded-lg bg-indigo-500/5 backdrop-blur-[1px]"
                       style={{
-                        width: `${Math.random() * 300 + 100}px`,
-                        height: `${Math.random() * 150 + 50}px`,
-                        left: `${Math.random() * 100}%`,
-                        top: `${Math.random() * 100}%`,
+                        width: block.width,
+                        height: block.height,
+                        left: block.left,
+                        top: block.top,
                         transform: 'translate(-50%, -50%) skew(15deg, -2deg)',
                       }}
                     />
