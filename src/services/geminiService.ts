@@ -4,7 +4,12 @@ let aiInstance: GoogleGenAI | null = null;
 
 export function getGeminiAI() {
   if (!aiInstance) {
-    const apiKey = process.env.GEMINI_API_KEY;
+    let apiKey: string | undefined;
+    try {
+      apiKey = process.env.GEMINI_API_KEY;
+    } catch (e) {
+      // process.env may be undefined in browser environments
+    }
     if (!apiKey) {
       throw new Error("GEMINI_API_KEY is not defined in environment variables.");
     }
@@ -13,7 +18,24 @@ export function getGeminiAI() {
   return aiInstance;
 }
 
+function sanitizeError(error: any, apiKey?: string): string {
+  let errStr = error instanceof Error ? error.stack || error.message : String(error);
+  if (apiKey) {
+    const escapedKey = apiKey.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+    errStr = errStr.replace(new RegExp(escapedKey, 'g'), '[REDACTED_API_KEY]');
+  }
+  errStr = errStr.replace(/AIzaSy[A-Za-z0-9-_]{29}/g, '[REDACTED_API_KEY]');
+  return errStr;
+}
+
 export async function askAiArchitect(prompt: string, context?: string) {
+  if (!prompt || typeof prompt !== "string") {
+    throw new Error("Invalid prompt provided.");
+  }
+  if (prompt.length > 4000) {
+    throw new Error("Prompt exceeds maximum length of 4000 characters.");
+  }
+
   const ai = getGeminiAI();
   const systemInstruction = `You are "ArcSystem PRO", a high-end professional Architect and Construction AI Consultant. 
   Your capabilities include:
@@ -38,7 +60,12 @@ export async function askAiArchitect(prompt: string, context?: string) {
 
     return response.text;
   } catch (error) {
-    console.error("Gemini API Error:", error);
-    throw error;
+    let key: string | undefined;
+    try {
+      key = process.env.GEMINI_API_KEY;
+    } catch (_) {}
+    const sanitizedMsg = sanitizeError(error, key);
+    console.error("Gemini API Error:", sanitizedMsg);
+    throw new Error("An error occurred during AI assistance generation.");
   }
 }
