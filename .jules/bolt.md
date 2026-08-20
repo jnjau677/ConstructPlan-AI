@@ -1,0 +1,3 @@
+## 2025-08-20 - React.lazy dynamic code splitting for sub-modules
+**Learning:** Heavy libraries like `recharts` and `react-markdown` bundled into the main entry point cause significant initial chunk bloat (~960 kB). When using Framer Motion `AnimatePresence`, `Suspense` boundaries must be nested inside `motion.div` so exit/enter transitions function correctly when switching lazy-loaded sub-modules.
+**Action:** Code-split route and tab-level components using `React.lazy` and place `<Suspense>` inside individual animated tab wrappers to achieve ~65% reduction in initial bundle size without disrupting UI animations.
