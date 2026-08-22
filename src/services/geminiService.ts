@@ -27,9 +27,13 @@ export async function askAiArchitect(prompt: string, context?: string) {
   Format your responses professionally with architectural terminology. Use Markdown. Always focus on technical precision paired with creative flexibility.`;
 
   try {
+    // Security: Limit input length to 4000 characters to prevent payload size issues/DoS
+    const sanitizedPrompt = prompt.slice(0, 4000);
+    const sanitizedContext = context ? context.slice(0, 4000) : undefined;
+
     const response = await ai.models.generateContent({
       model: "gemini-3-flash-preview",
-      contents: context ? `${context}\n\nUser Question: ${prompt}` : prompt,
+      contents: sanitizedContext ? `${sanitizedContext}\n\nUser Question: ${sanitizedPrompt}` : sanitizedPrompt,
       config: {
         systemInstruction,
         temperature: 0.7,
@@ -38,7 +42,8 @@ export async function askAiArchitect(prompt: string, context?: string) {
 
     return response.text;
   } catch (error) {
-    console.error("Gemini API Error:", error);
-    throw error;
+    // Security: Log generic error to avoid exposing sensitive tokens or internal stack details
+    console.error("Gemini API Error: Request processing failed.");
+    throw new Error("Failed to process request with AI service.");
   }
 }
