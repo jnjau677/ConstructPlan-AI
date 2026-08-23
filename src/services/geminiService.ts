@@ -13,6 +13,8 @@ export function getGeminiAI() {
   return aiInstance;
 }
 
+const MAX_INPUT_LENGTH = 4000;
+
 export async function askAiArchitect(prompt: string, context?: string) {
   const ai = getGeminiAI();
   const systemInstruction = `You are "ArcSystem PRO", a high-end professional Architect and Construction AI Consultant. 
@@ -26,10 +28,13 @@ export async function askAiArchitect(prompt: string, context?: string) {
   
   Format your responses professionally with architectural terminology. Use Markdown. Always focus on technical precision paired with creative flexibility.`;
 
+  const sanitizedPrompt = (prompt || "").trim().slice(0, MAX_INPUT_LENGTH);
+  const sanitizedContext = context ? context.trim().slice(0, MAX_INPUT_LENGTH) : undefined;
+
   try {
     const response = await ai.models.generateContent({
       model: "gemini-3-flash-preview",
-      contents: context ? `${context}\n\nUser Question: ${prompt}` : prompt,
+      contents: sanitizedContext ? `${sanitizedContext}\n\nUser Question: ${sanitizedPrompt}` : sanitizedPrompt,
       config: {
         systemInstruction,
         temperature: 0.7,
@@ -38,7 +43,8 @@ export async function askAiArchitect(prompt: string, context?: string) {
 
     return response.text;
   } catch (error) {
-    console.error("Gemini API Error:", error);
+    const safeErrorMessage = error instanceof Error ? error.message : "An error occurred during Gemini API execution.";
+    console.error("Gemini API Error:", safeErrorMessage);
     throw error;
   }
 }
