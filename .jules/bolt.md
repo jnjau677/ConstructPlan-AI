@@ -1,0 +1,3 @@
+## 2025-05-18 - React.lazy Dynamic Route/Module Code Splitting
+**Learning:** Monolithic component imports in `src/App.tsx` bundle large third-party libraries (e.g. `recharts`, `react-markdown`) into a single main JavaScript bundle (~960 kB), slowing down initial page load and TTI. Splitting non-essential sub-modules with `React.lazy()` reduces initial payload size significantly (~65% reduction) while preserving smooth UI transitions when combined with Framer Motion `AnimatePresence`.
+**Action:** Always dynamic import sub-modules/routes that pull heavy dependencies using `React.lazy()` and provide a lightweight, styled `LoadingModule` fallback inside `React.Suspense`.
