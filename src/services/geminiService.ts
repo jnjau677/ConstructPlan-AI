@@ -26,10 +26,13 @@ export async function askAiArchitect(prompt: string, context?: string) {
   
   Format your responses professionally with architectural terminology. Use Markdown. Always focus on technical precision paired with creative flexibility.`;
 
+  const sanitizedPrompt = (prompt || "").trim().slice(0, 4000);
+  const sanitizedContext = context ? context.trim().slice(0, 4000) : undefined;
+
   try {
     const response = await ai.models.generateContent({
       model: "gemini-3-flash-preview",
-      contents: context ? `${context}\n\nUser Question: ${prompt}` : prompt,
+      contents: sanitizedContext ? `${sanitizedContext}\n\nUser Question: ${sanitizedPrompt}` : sanitizedPrompt,
       config: {
         systemInstruction,
         temperature: 0.7,
@@ -38,7 +41,8 @@ export async function askAiArchitect(prompt: string, context?: string) {
 
     return response.text;
   } catch (error) {
-    console.error("Gemini API Error:", error);
-    throw error;
+    const safeErrorMessage = error instanceof Error ? error.message : "Unknown error occurred";
+    console.error("Gemini API Error:", safeErrorMessage);
+    throw new Error(safeErrorMessage);
   }
 }
