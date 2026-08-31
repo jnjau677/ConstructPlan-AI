@@ -15,6 +15,16 @@ export function getGeminiAI() {
 
 export async function askAiArchitect(prompt: string, context?: string) {
   const ai = getGeminiAI();
+
+  // Security: Enforce input length limits to mitigate resource exhaustion / DoS risks
+  const MAX_INPUT_LENGTH = 4000;
+  const sanitizedPrompt = (prompt || '').trim().slice(0, MAX_INPUT_LENGTH);
+  const sanitizedContext = context ? context.trim().slice(0, MAX_INPUT_LENGTH) : undefined;
+
+  if (!sanitizedPrompt) {
+    throw new Error("Prompt cannot be empty.");
+  }
+
   const systemInstruction = `You are "ArcSystem PRO", a high-end professional Architect and Construction AI Consultant. 
   Your capabilities include:
   1. Chat-to-Build Engine: Natural language modeling for architectural iteration.
@@ -29,7 +39,7 @@ export async function askAiArchitect(prompt: string, context?: string) {
   try {
     const response = await ai.models.generateContent({
       model: "gemini-3-flash-preview",
-      contents: context ? `${context}\n\nUser Question: ${prompt}` : prompt,
+      contents: sanitizedContext ? `${sanitizedContext}\n\nUser Question: ${sanitizedPrompt}` : sanitizedPrompt,
       config: {
         systemInstruction,
         temperature: 0.7,
@@ -38,7 +48,9 @@ export async function askAiArchitect(prompt: string, context?: string) {
 
     return response.text;
   } catch (error) {
-    console.error("Gemini API Error:", error);
-    throw error;
+    // Security: Secure error logging to avoid leaking sensitive internal details or API key info in error stacks
+    const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
+    console.error("Gemini API request failed:", errorMessage);
+    throw new Error("Failed to communicate with AI Architect service safely.");
   }
 }
