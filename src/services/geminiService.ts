@@ -1,6 +1,7 @@
 import { GoogleGenAI } from "@google/genai";
 
 let aiInstance: GoogleGenAI | null = null;
+const MAX_PROMPT_LENGTH = 4000;
 
 export function getGeminiAI() {
   if (!aiInstance) {
@@ -14,6 +15,14 @@ export function getGeminiAI() {
 }
 
 export async function askAiArchitect(prompt: string, context?: string) {
+  if (typeof prompt !== "string" || !prompt.trim()) {
+    throw new Error("Prompt cannot be empty.");
+  }
+
+  if (prompt.length > MAX_PROMPT_LENGTH) {
+    throw new Error(`Prompt exceeds maximum allowed length of ${MAX_PROMPT_LENGTH} characters.`);
+  }
+
   const ai = getGeminiAI();
   const systemInstruction = `You are "ArcSystem PRO", a high-end professional Architect and Construction AI Consultant. 
   Your capabilities include:
@@ -38,7 +47,9 @@ export async function askAiArchitect(prompt: string, context?: string) {
 
     return response.text;
   } catch (error) {
-    console.error("Gemini API Error:", error);
+    // Sanitize console error to prevent exposing internal config or API key details
+    const message = error instanceof Error ? error.message : "Unknown error occurred";
+    console.error("Gemini API Error:", message);
     throw error;
   }
 }
