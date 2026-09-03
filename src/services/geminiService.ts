@@ -26,10 +26,13 @@ export async function askAiArchitect(prompt: string, context?: string) {
   
   Format your responses professionally with architectural terminology. Use Markdown. Always focus on technical precision paired with creative flexibility.`;
 
+  // Input validation: ensure string input and restrict length to 4000 characters max
+  const sanitizedPrompt = typeof prompt === 'string' ? prompt.slice(0, 4000) : '';
+
   try {
     const response = await ai.models.generateContent({
       model: "gemini-3-flash-preview",
-      contents: context ? `${context}\n\nUser Question: ${prompt}` : prompt,
+      contents: context ? `${context}\n\nUser Question: ${sanitizedPrompt}` : sanitizedPrompt,
       config: {
         systemInstruction,
         temperature: 0.7,
@@ -38,7 +41,8 @@ export async function askAiArchitect(prompt: string, context?: string) {
 
     return response.text;
   } catch (error) {
-    console.error("Gemini API Error:", error);
+    // Sanitize error log to prevent leaking API keys or request headers in full error objects
+    console.error("Gemini API Error:", error instanceof Error ? error.message : "API request failed");
     throw error;
   }
 }
