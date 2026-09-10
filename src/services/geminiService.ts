@@ -14,6 +14,15 @@ export function getGeminiAI() {
 }
 
 export async function askAiArchitect(prompt: string, context?: string) {
+  const MAX_INPUT_LENGTH = 4000;
+  if (typeof prompt !== 'string' || !prompt.trim()) {
+    throw new Error("Invalid prompt provided to AI assistant.");
+  }
+
+  // Security: Enforce length limits to prevent payload size DoS attacks
+  const sanitizedPrompt = prompt.trim().slice(0, MAX_INPUT_LENGTH);
+  const sanitizedContext = context ? String(context).trim().slice(0, MAX_INPUT_LENGTH) : undefined;
+
   const ai = getGeminiAI();
   const systemInstruction = `You are "ArcSystem PRO", a high-end professional Architect and Construction AI Consultant. 
   Your capabilities include:
@@ -29,7 +38,7 @@ export async function askAiArchitect(prompt: string, context?: string) {
   try {
     const response = await ai.models.generateContent({
       model: "gemini-3-flash-preview",
-      contents: context ? `${context}\n\nUser Question: ${prompt}` : prompt,
+      contents: sanitizedContext ? `${sanitizedContext}\n\nUser Question: ${sanitizedPrompt}` : sanitizedPrompt,
       config: {
         systemInstruction,
         temperature: 0.7,
@@ -38,7 +47,9 @@ export async function askAiArchitect(prompt: string, context?: string) {
 
     return response.text;
   } catch (error) {
-    console.error("Gemini API Error:", error);
-    throw error;
+    // Security: Avoid logging raw error objects that may leak API keys or headers
+    const safeErrorMessage = error instanceof Error ? error.message : "Unknown error";
+    console.error("Gemini API Error:", safeErrorMessage);
+    throw new Error("Failed to communicate with AI Architect service.");
   }
 }
