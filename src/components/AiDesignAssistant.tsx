@@ -35,6 +35,11 @@ export default function AiDesignAssistant() {
   const handleSend = async () => {
     if (!input.trim() || isLoading) return;
 
+    if (input.trim().length > 4000) {
+      setMessages(prev => [...prev, { role: 'assistant', content: 'Error: Input prompt exceeds the maximum limit of 4000 characters.' }]);
+      return;
+    }
+
     const userMsg = input.trim();
     setInput('');
     setMessages(prev => [...prev, { role: 'user', content: userMsg }]);
@@ -43,8 +48,11 @@ export default function AiDesignAssistant() {
     try {
       const response = await askAiArchitect(userMsg);
       setMessages(prev => [...prev, { role: 'assistant', content: response || 'No response generated.' }]);
-    } catch (error) {
-      setMessages(prev => [...prev, { role: 'assistant', content: 'Apologies, I encountered a technical latency in the BIM cluster. Please re-initialize.' }]);
+    } catch (error: any) {
+      const errorMsg = error?.message && error.message.includes("4000")
+        ? error.message
+        : 'Apologies, I encountered a technical latency in the BIM cluster. Please re-initialize.';
+      setMessages(prev => [...prev, { role: 'assistant', content: errorMsg }]);
     } finally {
       setIsLoading(false);
     }
@@ -103,6 +111,7 @@ export default function AiDesignAssistant() {
           <div className="relative">
             <textarea
               value={input}
+              maxLength={4000}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), handleSend())}
               placeholder="Query zoning constraints, material lifecycle, or structural vectors..."

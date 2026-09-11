@@ -14,6 +14,14 @@ export function getGeminiAI() {
 }
 
 export async function askAiArchitect(prompt: string, context?: string) {
+  const trimmedPrompt = prompt?.trim();
+  if (!trimmedPrompt) {
+    throw new Error("Prompt cannot be empty.");
+  }
+  if (trimmedPrompt.length > 4000) {
+    throw new Error("Prompt exceeds maximum allowed length of 4000 characters.");
+  }
+
   const ai = getGeminiAI();
   const systemInstruction = `You are "ArcSystem PRO", a high-end professional Architect and Construction AI Consultant. 
   Your capabilities include:
@@ -29,7 +37,7 @@ export async function askAiArchitect(prompt: string, context?: string) {
   try {
     const response = await ai.models.generateContent({
       model: "gemini-3-flash-preview",
-      contents: context ? `${context}\n\nUser Question: ${prompt}` : prompt,
+      contents: context ? `${context}\n\nUser Question: ${trimmedPrompt}` : trimmedPrompt,
       config: {
         systemInstruction,
         temperature: 0.7,
@@ -37,8 +45,9 @@ export async function askAiArchitect(prompt: string, context?: string) {
     });
 
     return response.text;
-  } catch (error) {
-    console.error("Gemini API Error:", error);
-    throw error;
+  } catch (error: any) {
+    // Sanitize error log to prevent leaking system/API internals
+    console.error("Gemini API Error:", error?.message || "An error occurred.");
+    throw new Error("Failed to process AI request. Please try again.");
   }
 }
