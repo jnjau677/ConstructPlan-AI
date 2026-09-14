@@ -1,0 +1,3 @@
+## 2025-05-18 - React.lazy Code Splitting Reduces Main Bundle Size by ~23.5%
+**Learning:** Secondary UI tab modules like `AiDesignAssistant` carry heavy sub-dependencies (`react-markdown`, etc.). Dynamic dynamic dynamic dynamic dynamic code-splitting via `React.lazy` with `Suspense` allows the main initial bundle chunk size to shrink significantly from 960.15 kB to 734.30 kB (~23.5% reduction) without breaking Framer Motion `AnimatePresence` animations.
+**Action:** Always wrap `Suspense` boundaries directly inside `AnimatePresence` child containers so dynamic modules switch smoothly and lazy load on demand.
