@@ -26,6 +26,11 @@ export async function askAiArchitect(prompt: string, context?: string) {
   
   Format your responses professionally with architectural terminology. Use Markdown. Always focus on technical precision paired with creative flexibility.`;
 
+  // Enforce prompt length limits (4000 characters) to prevent DoS or excessive token consumption
+  if (prompt.length > 4000) {
+    throw new Error("Prompt exceeds maximum allowed length of 4000 characters.");
+  }
+
   try {
     const response = await ai.models.generateContent({
       model: "gemini-3-flash-preview",
@@ -38,7 +43,9 @@ export async function askAiArchitect(prompt: string, context?: string) {
 
     return response.text;
   } catch (error) {
-    console.error("Gemini API Error:", error);
-    throw error;
+    // Fail securely: Log sanitized message to avoid exposing raw stack traces, API keys, or internal config
+    const message = error instanceof Error ? error.message : "Unknown API error";
+    console.error("Gemini API Error:", message);
+    throw new Error("Failed to process request with AI Architect. Please try again.");
   }
 }
