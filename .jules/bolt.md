@@ -1,0 +1,3 @@
+## 2026-09-15 - React.lazy Dynamic Imports for BIM Sub-modules
+**Learning:** Secondary tab components in large single-page dashboards (e.g. `SiteAnalysis`, `AiDesignAssistant`, `EngineeringCalculators`) significantly inflate the initial main JavaScript bundle size when statically imported. Splitting these into dynamic `React.lazy()` imports reduces the initial JS bundle size from 960 kB to ~735 kB (~23.5% reduction) without degrading user navigation experience.
+**Action:** Always wrap non-critical initial tab views in `React.lazy()` and provide a lightweight global `Suspense` fallback component.
