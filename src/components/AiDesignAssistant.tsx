@@ -103,6 +103,7 @@ export default function AiDesignAssistant() {
           <div className="relative">
             <textarea
               value={input}
+              maxLength={4000}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), handleSend())}
               placeholder="Query zoning constraints, material lifecycle, or structural vectors..."
