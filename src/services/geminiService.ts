@@ -14,6 +14,8 @@ export function getGeminiAI() {
 }
 
 export async function askAiArchitect(prompt: string, context?: string) {
+  // Security: Enforce character limit to mitigate DoS / excessive token payload risks
+  const sanitizedPrompt = prompt.slice(0, 4000);
   const ai = getGeminiAI();
   const systemInstruction = `You are "ArcSystem PRO", a high-end professional Architect and Construction AI Consultant. 
   Your capabilities include:
@@ -29,7 +31,7 @@ export async function askAiArchitect(prompt: string, context?: string) {
   try {
     const response = await ai.models.generateContent({
       model: "gemini-3-flash-preview",
-      contents: context ? `${context}\n\nUser Question: ${prompt}` : prompt,
+      contents: context ? `${context}\n\nUser Question: ${sanitizedPrompt}` : sanitizedPrompt,
       config: {
         systemInstruction,
         temperature: 0.7,
@@ -38,7 +40,9 @@ export async function askAiArchitect(prompt: string, context?: string) {
 
     return response.text;
   } catch (error) {
-    console.error("Gemini API Error:", error);
-    throw error;
+    // Security: Sanitize console output to prevent credential/config leak from internal SDK error object
+    const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
+    console.error("Gemini API Error:", errorMessage);
+    throw new Error("Failed to process request with AI service.");
   }
 }
