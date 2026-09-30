@@ -3,16 +3,19 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from 'react';
+import React, { useState, Suspense, lazy } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import Sidebar from './components/Sidebar.tsx';
 import Dashboard from './components/Dashboard.tsx';
-import EngineeringCalculators from './components/EngineeringCalculators.tsx';
-import AiDesignAssistant from './components/AiDesignAssistant.tsx';
-import SiteAnalysis from './components/SiteAnalysis.tsx';
-import TakeoffEstimator from './components/TakeoffEstimator.tsx';
-import SchematicStudio from './components/SchematicStudio.tsx';
-import SystemCapabilities from './components/SystemCapabilities.tsx';
+import LoadingModule from './components/LoadingModule.tsx';
+
+// Performance optimization: Lazy-load non-critical sub-modules to reduce initial bundle size
+const DynamicEngineeringCalculators = lazy(() => import('./components/EngineeringCalculators.tsx'));
+const DynamicAiDesignAssistant = lazy(() => import('./components/AiDesignAssistant.tsx'));
+const DynamicSiteAnalysis = lazy(() => import('./components/SiteAnalysis.tsx'));
+const DynamicTakeoffEstimator = lazy(() => import('./components/TakeoffEstimator.tsx'));
+const DynamicSchematicStudio = lazy(() => import('./components/SchematicStudio.tsx'));
+const DynamicSystemCapabilities = lazy(() => import('./components/SystemCapabilities.tsx'));
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('overview');
@@ -22,17 +25,17 @@ export default function App() {
       case 'overview':
         return <Dashboard key="overview" />;
       case 'capabilities':
-        return <SystemCapabilities key="capabilities" />;
+        return <DynamicSystemCapabilities key="capabilities" />;
       case 'schematics':
-        return <SchematicStudio key="schematics" />;
+        return <DynamicSchematicStudio key="schematics" />;
       case 'calculators':
-        return <EngineeringCalculators key="calculators" />;
+        return <DynamicEngineeringCalculators key="calculators" />;
       case 'ai-assistant':
-        return <AiDesignAssistant key="ai-assistant" />;
+        return <DynamicAiDesignAssistant key="ai-assistant" />;
       case 'site-analysis':
-        return <SiteAnalysis key="site-analysis" />;
+        return <DynamicSiteAnalysis key="site-analysis" />;
       case 'estimations':
-        return <TakeoffEstimator key="estimations" />;
+        return <DynamicTakeoffEstimator key="estimations" />;
       default:
         return <Dashboard key="default" />;
     }
@@ -53,7 +56,9 @@ export default function App() {
                 exit={{ opacity: 0, x: -20 }}
                 transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
               >
-                {renderContent()}
+                <Suspense fallback={<LoadingModule />}>
+                  {renderContent()}
+                </Suspense>
               </motion.div>
             </AnimatePresence>
           </div>
