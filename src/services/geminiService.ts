@@ -14,6 +14,14 @@ export function getGeminiAI() {
 }
 
 export async function askAiArchitect(prompt: string, context?: string) {
+  if (!prompt || typeof prompt !== 'string' || !prompt.trim()) {
+    throw new Error("Prompt must be a non-empty string.");
+  }
+
+  // Security: Restrict maximum prompt size to prevent payload exhaustion / DoS attacks
+  const MAX_PROMPT_LENGTH = 4000;
+  const sanitizedPrompt = prompt.trim().slice(0, MAX_PROMPT_LENGTH);
+
   const ai = getGeminiAI();
   const systemInstruction = `You are "ArcSystem PRO", a high-end professional Architect and Construction AI Consultant. 
   Your capabilities include:
@@ -29,7 +37,7 @@ export async function askAiArchitect(prompt: string, context?: string) {
   try {
     const response = await ai.models.generateContent({
       model: "gemini-3-flash-preview",
-      contents: context ? `${context}\n\nUser Question: ${prompt}` : prompt,
+      contents: context ? `${context}\n\nUser Question: ${sanitizedPrompt}` : sanitizedPrompt,
       config: {
         systemInstruction,
         temperature: 0.7,
@@ -38,7 +46,9 @@ export async function askAiArchitect(prompt: string, context?: string) {
 
     return response.text;
   } catch (error) {
-    console.error("Gemini API Error:", error);
-    throw error;
+    // Security: Sanitize error output to prevent credential/stack leakage in browser logs
+    const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred.";
+    console.error("Gemini API Error:", errorMessage);
+    throw new Error("Failed to generate response from AI Architect service.");
   }
 }
