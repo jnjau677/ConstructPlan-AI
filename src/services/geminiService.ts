@@ -27,9 +27,12 @@ export async function askAiArchitect(prompt: string, context?: string) {
   Format your responses professionally with architectural terminology. Use Markdown. Always focus on technical precision paired with creative flexibility.`;
 
   try {
+    const trimmedPrompt = prompt.slice(0, 4000);
+    const trimmedContext = context ? context.slice(0, 4000) : undefined;
+
     const response = await ai.models.generateContent({
       model: "gemini-3-flash-preview",
-      contents: context ? `${context}\n\nUser Question: ${prompt}` : prompt,
+      contents: trimmedContext ? `${trimmedContext}\n\nUser Question: ${trimmedPrompt}` : trimmedPrompt,
       config: {
         systemInstruction,
         temperature: 0.7,
@@ -38,7 +41,9 @@ export async function askAiArchitect(prompt: string, context?: string) {
 
     return response.text;
   } catch (error) {
-    console.error("Gemini API Error:", error);
-    throw error;
+    // Sanitize error logging to prevent leaking stack traces or sensitive credentials in logs
+    const safeErrorMessage = error instanceof Error ? error.message : "Unknown error";
+    console.error("Gemini API Error:", safeErrorMessage);
+    throw new Error("Failed to process request in Gemini service.");
   }
 }
