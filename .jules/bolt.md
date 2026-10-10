@@ -1,0 +1,3 @@
+## 2026-10-10 - React.lazy Code Splitting for Secondary BIM Modules
+**Learning:** Eagerly importing all secondary sub-modules in `App.tsx` bloated the initial main JS bundle chunk to 960 kB due to heavy embedded libraries (e.g. `react-markdown` in AI Assistant). Eagerly loading `Dashboard` while code-splitting secondary views with `React.lazy` and `Suspense` inside `AnimatePresence` reduced initial bundle size by ~23.5% (down to ~735 kB) without degrading route transition animations.
+**Action:** Always maintain main entry views eagerly loaded for fast LCP while dynamic `lazy()` imports partition heavy secondary feature views into separate chunks.
