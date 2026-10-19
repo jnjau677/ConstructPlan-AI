@@ -16,8 +16,10 @@ const estimates = [
   { id: '4', item: 'Internal Glazing - Clear Loft', category: 'Finishes', unit: 'm2', quantity: 85, rate: 180, total: 15300, change: -1.2 },
 ];
 
+// Lift calculation to module scope so array reduction is performed once at module load time rather than on every render
+const GRAND_TOTAL = estimates.reduce((acc, curr) => acc + curr.total, 0);
+
 export default function TakeoffEstimator() {
-  const grandTotal = estimates.reduce((acc, curr) => acc + curr.total, 0);
 
   return (
     <div className="space-y-8">
@@ -81,7 +83,7 @@ export default function TakeoffEstimator() {
             <div className="p-10 bg-[#020617] text-white flex justify-between items-center border-t border-slate-800">
               <div>
                 <p className="text-[10px] uppercase tracking-[0.4em] font-bold text-slate-500 mb-2">Aggregate Estimation</p>
-                <h3 className="text-5xl font-bold font-mono tracking-tighter text-white">${grandTotal.toLocaleString()}</h3>
+                <h3 className="text-5xl font-bold font-mono tracking-tighter text-white">${GRAND_TOTAL.toLocaleString()}</h3>
               </div>
               <button className="px-10 py-4 bg-indigo-600 rounded-xl font-bold uppercase text-[10px] tracking-widest hover:bg-indigo-500 transition-all shadow-lg shadow-indigo-900/40 flex items-center gap-3 group">
                  Commit to Budget
