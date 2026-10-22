@@ -38,7 +38,9 @@ export async function askAiArchitect(prompt: string, context?: string) {
 
     return response.text;
   } catch (error) {
-    console.error("Gemini API Error:", error);
+    // Sanitize error logging to avoid leaking sensitive request/response details or stack traces
+    const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred.";
+    console.error("Gemini API Error:", errorMessage);
     throw error;
   }
 }
