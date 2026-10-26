@@ -16,8 +16,11 @@ const estimates = [
   { id: '4', item: 'Internal Glazing - Clear Loft', category: 'Finishes', unit: 'm2', quantity: 85, rate: 180, total: 15300, change: -1.2 },
 ];
 
+// Hoist static estimates total calculation to module scope to avoid redundant array reduction calls on component re-renders
+const GRAND_TOTAL = estimates.reduce((acc, curr) => acc + curr.total, 0);
+
 export default function TakeoffEstimator() {
-  const grandTotal = estimates.reduce((acc, curr) => acc + curr.total, 0);
+  const grandTotal = GRAND_TOTAL;
 
   return (
     <div className="space-y-8">
