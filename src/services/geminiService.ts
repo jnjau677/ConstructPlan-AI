@@ -13,8 +13,11 @@ export function getGeminiAI() {
   return aiInstance;
 }
 
+const MAX_PROMPT_LENGTH = 4000;
+
 export async function askAiArchitect(prompt: string, context?: string) {
   const ai = getGeminiAI();
+  const sanitizedPrompt = prompt.slice(0, MAX_PROMPT_LENGTH);
   const systemInstruction = `You are "ArcSystem PRO", a high-end professional Architect and Construction AI Consultant. 
   Your capabilities include:
   1. Chat-to-Build Engine: Natural language modeling for architectural iteration.
@@ -29,7 +32,7 @@ export async function askAiArchitect(prompt: string, context?: string) {
   try {
     const response = await ai.models.generateContent({
       model: "gemini-3-flash-preview",
-      contents: context ? `${context}\n\nUser Question: ${prompt}` : prompt,
+      contents: context ? `${context}\n\nUser Question: ${sanitizedPrompt}` : sanitizedPrompt,
       config: {
         systemInstruction,
         temperature: 0.7,
@@ -38,7 +41,8 @@ export async function askAiArchitect(prompt: string, context?: string) {
 
     return response.text;
   } catch (error) {
-    console.error("Gemini API Error:", error);
+    // Sanitize error logging to avoid leaking sensitive credentials or raw API payloads
+    console.error("Gemini API Error:", error instanceof Error ? error.message : "API Request Failed");
     throw error;
   }
 }
