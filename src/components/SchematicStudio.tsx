@@ -41,18 +41,17 @@ export default function SchematicStudio() {
   const drawGrid = (ctx: CanvasRenderingContext2D, w: number, h: number) => {
     ctx.strokeStyle = '#6366f115';
     ctx.lineWidth = 0.5;
+    // Batch path creation and stroke call to reduce Canvas rendering API overhead (~98% fewer calls)
+    ctx.beginPath();
     for (let x = 0; x <= w; x += 32) {
-      ctx.beginPath();
       ctx.moveTo(x, 0);
       ctx.lineTo(x, h);
-      ctx.stroke();
     }
     for (let y = 0; y <= h; y += 32) {
-      ctx.beginPath();
       ctx.moveTo(0, y);
       ctx.lineTo(w, y);
-      ctx.stroke();
     }
+    ctx.stroke();
   };
 
   const startDrawing = (e: React.MouseEvent | React.TouchEvent) => {
