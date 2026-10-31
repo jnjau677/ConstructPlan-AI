@@ -41,18 +41,19 @@ export default function SchematicStudio() {
   const drawGrid = (ctx: CanvasRenderingContext2D, w: number, h: number) => {
     ctx.strokeStyle = '#6366f115';
     ctx.lineWidth = 0.5;
+    // Bolt Optimization: Batch canvas path segments into a single beginPath / stroke call.
+    // Calling beginPath() and stroke() on each grid line flushes the 2D rendering pipeline ~60-100 times.
+    // Batching executes all moveTo/lineTo calls into one sub-path set and strokes once (~98% draw call reduction).
+    ctx.beginPath();
     for (let x = 0; x <= w; x += 32) {
-      ctx.beginPath();
       ctx.moveTo(x, 0);
       ctx.lineTo(x, h);
-      ctx.stroke();
     }
     for (let y = 0; y <= h; y += 32) {
-      ctx.beginPath();
       ctx.moveTo(0, y);
       ctx.lineTo(w, y);
-      ctx.stroke();
     }
+    ctx.stroke();
   };
 
   const startDrawing = (e: React.MouseEvent | React.TouchEvent) => {
