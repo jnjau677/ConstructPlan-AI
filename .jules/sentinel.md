@@ -1,0 +1,4 @@
+## 2026-09-30 - Client-Side AI Input Validation & Safe Error Handling
+**Vulnerability:** Unbounded user prompt payloads sent to the Gemini AI API and raw error object logging could lead to client/network denial of service (DoS), runaway token consumption, or unintended exposure of internal SDK configuration/credentials in console errors.
+**Learning:** Browser-based AI clients need strict character limits on both the UI level (`maxLength`) and the service boundary (`slice`), accompanied by sanitized error logs that extract only safe error messages rather than dumping the full error object or stack traces.
+**Prevention:** Always pair form input controls with appropriate length limits and ensure external service calls defensively sanitize inputs and scrub error logs before returning generic errors to users.
