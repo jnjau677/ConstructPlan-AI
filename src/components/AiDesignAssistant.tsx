@@ -10,7 +10,7 @@ import {
   AlertCircle
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { askAiArchitect } from '../services/geminiService';
+import { askAiArchitect, MAX_PROMPT_LENGTH } from '../services/geminiService';
 import ReactMarkdown from 'react-markdown';
 
 interface Message {
@@ -36,6 +36,7 @@ export default function AiDesignAssistant() {
     if (!input.trim() || isLoading) return;
 
     const userMsg = input.trim();
+    if (userMsg.length > MAX_PROMPT_LENGTH) return;
     setInput('');
     setMessages(prev => [...prev, { role: 'user', content: userMsg }]);
     setIsLoading(true);
@@ -103,6 +104,7 @@ export default function AiDesignAssistant() {
           <div className="relative">
             <textarea
               value={input}
+              maxLength={MAX_PROMPT_LENGTH}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), handleSend())}
               placeholder="Query zoning constraints, material lifecycle, or structural vectors..."
@@ -110,13 +112,19 @@ export default function AiDesignAssistant() {
             />
             <button 
               onClick={handleSend}
-              disabled={isLoading || !input.trim()}
+              disabled={isLoading || !input.trim() || input.length > MAX_PROMPT_LENGTH}
+              aria-label="Send query"
               className="absolute bottom-4 right-4 p-3 bg-indigo-600 text-white rounded-xl hover:bg-indigo-500 transition-all disabled:opacity-20 shadow-lg shadow-indigo-900/20"
             >
               <Send className="w-4 h-4" />
             </button>
           </div>
-          <p className="text-[9px] text-slate-600 mt-3 uppercase tracking-tighter text-center font-mono">Kernel: Gemini-3-Flash // Verify with local council data</p>
+          <div className="flex justify-between items-center mt-3 px-1 text-[9px] text-slate-600 font-mono">
+            <span className="uppercase tracking-tighter">Kernel: Gemini-3-Flash // Verify with local council data</span>
+            <span className={`tracking-widest ${input.length >= MAX_PROMPT_LENGTH ? 'text-amber-400 font-bold' : 'text-slate-500'}`}>
+              {input.length}/{MAX_PROMPT_LENGTH}
+            </span>
+          </div>
         </div>
       </div>
 
