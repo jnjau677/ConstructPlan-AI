@@ -13,7 +13,19 @@ export function getGeminiAI() {
   return aiInstance;
 }
 
+// Maximum allowed character length for prompts to prevent payload size issues and API abuse
+const MAX_PROMPT_LENGTH = 4000;
+
 export async function askAiArchitect(prompt: string, context?: string) {
+  // Security input validation: prevent empty inputs or excessively large payloads (DoS protection)
+  const trimmedPrompt = prompt?.trim();
+  if (!trimmedPrompt) {
+    throw new Error("Prompt cannot be empty.");
+  }
+  if (trimmedPrompt.length > MAX_PROMPT_LENGTH) {
+    throw new Error(`Prompt exceeds maximum allowed length of ${MAX_PROMPT_LENGTH} characters.`);
+  }
+
   const ai = getGeminiAI();
   const systemInstruction = `You are "ArcSystem PRO", a high-end professional Architect and Construction AI Consultant. 
   Your capabilities include:
@@ -29,7 +41,7 @@ export async function askAiArchitect(prompt: string, context?: string) {
   try {
     const response = await ai.models.generateContent({
       model: "gemini-3-flash-preview",
-      contents: context ? `${context}\n\nUser Question: ${prompt}` : prompt,
+      contents: context ? `${context}\n\nUser Question: ${trimmedPrompt}` : trimmedPrompt,
       config: {
         systemInstruction,
         temperature: 0.7,
@@ -38,7 +50,9 @@ export async function askAiArchitect(prompt: string, context?: string) {
 
     return response.text;
   } catch (error) {
-    console.error("Gemini API Error:", error);
-    throw error;
+    // Fail securely: sanitize error logging to avoid leaking internal configurations or credentials
+    const safeErrorMessage = error instanceof Error ? error.message : "Unknown error";
+    console.error("Gemini API Error:", safeErrorMessage);
+    throw new Error("Unable to process request with AI service.");
   }
 }
