@@ -3,16 +3,31 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from 'react';
+import React, { useState, Suspense, lazy } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import Sidebar from './components/Sidebar.tsx';
 import Dashboard from './components/Dashboard.tsx';
-import EngineeringCalculators from './components/EngineeringCalculators.tsx';
-import AiDesignAssistant from './components/AiDesignAssistant.tsx';
-import SiteAnalysis from './components/SiteAnalysis.tsx';
-import TakeoffEstimator from './components/TakeoffEstimator.tsx';
-import SchematicStudio from './components/SchematicStudio.tsx';
-import SystemCapabilities from './components/SystemCapabilities.tsx';
+
+// Performance optimization: Lazy-load secondary modules to split bundle and minimize initial load time
+const EngineeringCalculators = lazy(() => import('./components/EngineeringCalculators.tsx'));
+const AiDesignAssistant = lazy(() => import('./components/AiDesignAssistant.tsx'));
+const SiteAnalysis = lazy(() => import('./components/SiteAnalysis.tsx'));
+const TakeoffEstimator = lazy(() => import('./components/TakeoffEstimator.tsx'));
+const SchematicStudio = lazy(() => import('./components/SchematicStudio.tsx'));
+const SystemCapabilities = lazy(() => import('./components/SystemCapabilities.tsx'));
+
+function LoadingModule() {
+  return (
+    <div className="flex items-center justify-center min-h-[400px]">
+      <div className="flex flex-col items-center gap-3 p-8 bg-slate-900/60 rounded-2xl border border-slate-800">
+        <div className="w-8 h-8 rounded-lg border-2 border-indigo-500 border-t-transparent animate-spin" />
+        <span className="text-xs font-mono text-slate-400 uppercase tracking-widest animate-pulse">
+          LOADING_BIM_MODULE...
+        </span>
+      </div>
+    </div>
+  );
+}
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('overview');
@@ -53,7 +68,9 @@ export default function App() {
                 exit={{ opacity: 0, x: -20 }}
                 transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
               >
-                {renderContent()}
+                <Suspense fallback={<LoadingModule />}>
+                  {renderContent()}
+                </Suspense>
               </motion.div>
             </AnimatePresence>
           </div>
