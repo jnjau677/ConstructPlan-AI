@@ -1,0 +1,4 @@
+## 2025-05-18 - Client-Side AI Prompt Validation and Error Sanitization
+**Vulnerability:** Unbounded user prompt sizes sent to Gemini API without length limits or error sanitization, risking resource/token exhaustion and console credential/header leakage from raw API error objects.
+**Learning:** In frontend client apps directly communicating with GenAI SDKs, logging raw caught error objects can leak underlying request headers, URLs with embedded keys, or service configuration to browser developer consoles. Furthermore, missing payload boundaries on prompt textareas can cause unbounded token consumption or UI lockup.
+**Prevention:** Enforce input length constraints (maxLength) both at the component level and the service layer, and sanitize caught API errors to log and display generic or sanitized error messages.

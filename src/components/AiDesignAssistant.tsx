@@ -35,7 +35,7 @@ export default function AiDesignAssistant() {
   const handleSend = async () => {
     if (!input.trim() || isLoading) return;
 
-    const userMsg = input.trim();
+    const userMsg = input.trim().slice(0, 4000);
     setInput('');
     setMessages(prev => [...prev, { role: 'user', content: userMsg }]);
     setIsLoading(true);
@@ -43,7 +43,7 @@ export default function AiDesignAssistant() {
     try {
       const response = await askAiArchitect(userMsg);
       setMessages(prev => [...prev, { role: 'assistant', content: response || 'No response generated.' }]);
-    } catch (error) {
+    } catch {
       setMessages(prev => [...prev, { role: 'assistant', content: 'Apologies, I encountered a technical latency in the BIM cluster. Please re-initialize.' }]);
     } finally {
       setIsLoading(false);
@@ -103,6 +103,7 @@ export default function AiDesignAssistant() {
           <div className="relative">
             <textarea
               value={input}
+              maxLength={4000}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), handleSend())}
               placeholder="Query zoning constraints, material lifecycle, or structural vectors..."
