@@ -35,6 +35,9 @@ export default function AiDesignAssistant() {
   const handleSend = async () => {
     if (!input.trim() || isLoading) return;
 
+    // Security: Enforce input limit to prevent payload bloat and DoS
+    if (input.length > 4000) return;
+
     const userMsg = input.trim();
     setInput('');
     setMessages(prev => [...prev, { role: 'user', content: userMsg }]);
@@ -103,6 +106,7 @@ export default function AiDesignAssistant() {
           <div className="relative">
             <textarea
               value={input}
+              maxLength={4000}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), handleSend())}
               placeholder="Query zoning constraints, material lifecycle, or structural vectors..."
