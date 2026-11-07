@@ -1,0 +1,4 @@
+## 2026-03-07 - Code Splitting with React.lazy and Framer Motion AnimatePresence
+
+**Learning:** When using Framer Motion's `AnimatePresence` with `mode="wait"`, wrapping `{renderContent()}` in `<Suspense>` inside `motion.div` rather than wrapping `AnimatePresence` itself prevents exit animation clipping and race conditions during dynamic chunk resolution. Furthermore, eagerly importing the initial tab (`Dashboard`) while lazy-loading secondary tabs drops the initial JavaScript bundle chunk from 960 kB to 734 kB (~23.5% reduction, 226 kB gzip) without any initial render latency.
+**Action:** When introducing code splitting in tabbed/routed SPAs powered by Framer Motion, place `<Suspense>` inside the animated motion container and keep the landing tab eagerly loaded for zero-overhead initial paint.
