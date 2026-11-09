@@ -32,8 +32,11 @@ export default function AiDesignAssistant() {
     }
   }, [messages]);
 
+  const MAX_INPUT_CHARS = 4000;
+
   const handleSend = async () => {
     if (!input.trim() || isLoading) return;
+    if (input.trim().length > MAX_INPUT_CHARS) return;
 
     const userMsg = input.trim();
     setInput('');
@@ -103,15 +106,21 @@ export default function AiDesignAssistant() {
           <div className="relative">
             <textarea
               value={input}
+              maxLength={MAX_INPUT_CHARS}
+              aria-label="Design Query Input"
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), handleSend())}
               placeholder="Query zoning constraints, material lifecycle, or structural vectors..."
-              className="w-full bg-[#020617] border border-slate-800 p-4 pr-16 rounded-2xl min-h-[100px] resize-none focus:outline-none focus:border-indigo-500 transition-all font-sans text-sm text-white placeholder-slate-600"
+              className="w-full bg-[#020617] border border-slate-800 p-4 pr-16 pb-8 rounded-2xl min-h-[100px] resize-none focus:outline-none focus:border-indigo-500 transition-all font-sans text-sm text-white placeholder-slate-600"
             />
+            <div className="absolute bottom-3 left-4 text-[9px] font-mono text-slate-500">
+              {input.length}/{MAX_INPUT_CHARS}
+            </div>
             <button 
               onClick={handleSend}
-              disabled={isLoading || !input.trim()}
-              className="absolute bottom-4 right-4 p-3 bg-indigo-600 text-white rounded-xl hover:bg-indigo-500 transition-all disabled:opacity-20 shadow-lg shadow-indigo-900/20"
+              disabled={isLoading || !input.trim() || input.length > MAX_INPUT_CHARS}
+              aria-label="Send Query"
+              className="absolute bottom-3 right-4 p-3 bg-indigo-600 text-white rounded-xl hover:bg-indigo-500 transition-all disabled:opacity-20 shadow-lg shadow-indigo-900/20"
             >
               <Send className="w-4 h-4" />
             </button>
