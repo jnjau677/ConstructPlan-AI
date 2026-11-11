@@ -10,7 +10,7 @@ import {
   AlertCircle
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { askAiArchitect } from '../services/geminiService';
+import { askAiArchitect, MAX_PROMPT_LENGTH } from '../services/geminiService';
 import ReactMarkdown from 'react-markdown';
 
 interface Message {
@@ -103,15 +103,18 @@ export default function AiDesignAssistant() {
           <div className="relative">
             <textarea
               value={input}
+              maxLength={MAX_PROMPT_LENGTH}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), handleSend())}
               placeholder="Query zoning constraints, material lifecycle, or structural vectors..."
               className="w-full bg-[#020617] border border-slate-800 p-4 pr-16 rounded-2xl min-h-[100px] resize-none focus:outline-none focus:border-indigo-500 transition-all font-sans text-sm text-white placeholder-slate-600"
+              aria-label="AI prompt input"
             />
             <button 
               onClick={handleSend}
               disabled={isLoading || !input.trim()}
               className="absolute bottom-4 right-4 p-3 bg-indigo-600 text-white rounded-xl hover:bg-indigo-500 transition-all disabled:opacity-20 shadow-lg shadow-indigo-900/20"
+              aria-label="Send message"
             >
               <Send className="w-4 h-4" />
             </button>
